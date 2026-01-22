@@ -1,0 +1,77 @@
+# Default to LF for everything
+* text=auto eol=lf
+.editorconfig  text eol=lf
+
+# Web & Python Sources
+*.html text eol=lf
+*.css  text eol=lf
+*.js   text eol=lf
+*.py   text eol=lf
+
+# Windows Scripts must be CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# simulide files are CRLF
+*.sim1    text eol=crlf
+*.package text eol=crlf
+
+# Explicitly force LF for build criticals
+*.sh       text eol=lf
+*.command  text eol=lf
+makefile   text eol=lf
+Dockerfile text eol=lf
+
+# Config Files
+*.xml  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+
+# C Sources are Text
+*.c    text eol=lf
+*.h    text eol=lf
+
+# Arduino Sources are Text
+*.ino  text eol=lf
+
+# Binary Sources are Text
+*.asm  text eol=lf
+*.s    text eol=lf
+*.S    text eol=lf
+
+# SDCC Artifacts are Binary
+*.bin   binary
+*.ihx   binary
+*.lk    binary
+*.noi   binary
+*.map   binary
+
+# Arduino Artifacts are Binary
+*.hex   binary
+*.elf   binary
+
+# VS Code Extensions are binary
+*.vsix  binary
+
+# Compressed files are Binary
+*.zip   binary
+*.7z    binary
+*.tar   binary
+*.gz    binary
+
+# Docs are Binary
+*.pdf   binary
+*.doc   binary
+*.docx  binary
+*.ppt   binary
+*.pptx  binary
+*.xls   binary
+*.xlsx  binary
+
+# Images are Binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
