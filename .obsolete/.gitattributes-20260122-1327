@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 .gitattributes text eol=lf
 .gitignore     text eol=lf
 
+=======
+>>>>>>> 3ca2f712e5b943c6eedb9008908c29dd9143921c
 # Default to LF for everything
 * text=auto eol=lf
 .editorconfig  text eol=lf
