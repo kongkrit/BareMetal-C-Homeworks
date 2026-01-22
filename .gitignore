@@ -1,0 +1,74 @@
+# IDE & EDITOR CONFIG
+# ===================
+# VS Code internal caches (keep settings.json, tasks.json, etc.)
+.vscode/browse.vc.db
+.vscode/ipch/
+
+# Optional: annoying local debug
+.vscode/launch.json
+
+# Extracted SDCC Headers
+.vscode/sdcc-include/
+
+# Backup artifacts
+# ================
+*.bak
+
+# Build artifacts by compiler/assembler (in code/ and all subfolders)
+# ==================================================================
+code/**/*.stamp
+code/**/*.asm
+code/**/*.lk
+code/**/*.lst
+code/**/*.map
+code/**/*.noi
+code/**/*.rel
+code/**/*.rst
+code/**/*.sym
+code/**/*.txs
+
+code/**/*.bin
+code/**/*.ihx
+
+code/**/*.lib
+
+# Copied Binary from code
+sim/**/*.bin
+
+# Built vsix
+vscode-extension/*.vsix
+
+# OS GARBAGE (Mac/Windows/Linux)
+# ==============================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.tscache
+
+# Docker temp files
+# =================
+docker-images/*/_shared.*
+docker-images/*/_temp.*
+
+# Global Node Ignores
+# ===================
+**/node_modules/
+**/npm-debug.log
+
+# OFFICE GHOST FILES (Temporary Locks)
+# ====================================
+~$*
