@@ -11,9 +11,22 @@
 <body>
     <div class="container">
         <h1>BareMetal-C Homeworks</h1>
-        <div id="link-container" class="link-list">
+
+        <div>
+            <p id="salt"></p>
+            <input type="text" id="student-id" placeholder="Student ID (numbers only)">
+            <button id="get-hw-btn">get homework</button>
         </div>
+
+        <div id="result-section" style="display:none;">
+            <div class="label">Homework Hash:</div>
+            <input type="text" id="hash-output" readonly>
+        </div>
+
+        <div id="link-container"></div>
     </div>
+    <script src="dom.js"></script>
+    <script src="utils.js"></script>
     <script src="index.js"></script>
 </body>
 
