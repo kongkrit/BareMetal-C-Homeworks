@@ -1,18 +1,16 @@
-// --- Configuration ---
 const config = {
     maxHomeworks: 2,
     padLength: 2,
-    minIdLength: 4
+    minIdLength: 4,
+    saltText: "BareMetal-C-Homeworks-"
 };
 
 // --- DOM elements ---
 const dom = {
     linkContainer: byId("link-container"),
-    salt:          byId("salt"),
-    studentId:     byId("student-id"),
-    getHwBtn:      byId("get-hw-btn"),
-    resultSection: byId("result-section"),
-    hashOutput:    byId("hash-output"),
+    salt: byId("salt"),
+    studentId: byId("student-id"),
+    getHwBtn: byId("get-hw-btn"),
 };
 
 // --- UI Logic ---
@@ -22,12 +20,12 @@ function updateSalt() {
     dom.salt.textContent = `BareMetal-C-Homeworks-${year}`;
 }
 
-function generateLinks(studentId, hash) {
+function generateLinks(studentId) {
     if (!dom.linkContainer) return;
 
     dom.linkContainer.innerHTML = '';
-    
-    const year = new Date().getFullYear();
+
+    const saltText = dom.salt.textContent;
     const fragment = document.createDocumentFragment();
 
     for (let i = 1; i <= config.maxHomeworks; i++) {
@@ -35,9 +33,9 @@ function generateLinks(studentId, hash) {
         const folderName = `homework${numStr}`;
 
         const a = document.createElement('a');
-        a.href = `./${folderName}/index.html?id=${studentId}&year=${year}&hash=${hash}`;
+        a.href = `./${folderName}/index.html?id=${studentId}&salt=${saltText}`;
         a.textContent = folderName;
-        
+
         fragment.appendChild(a);
     }
 
@@ -62,11 +60,8 @@ async function handleGetHomework() {
         const inputString = saltText + studentId;
         const hash = await sha256(inputString);
 
-        dom.hashOutput.value = hash;
-        dom.resultSection.style.display = "block";
-        
-        generateLinks(studentId, hash);
-        
+        generateLinks(studentId);
+
     } catch (err) {
         console.error("Hashing failed", err);
     }
@@ -75,10 +70,10 @@ async function handleGetHomework() {
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     updateSalt();
-    
+
     if (dom.studentId) {
         dom.studentId.addEventListener('input', enforceNumericInput);
-        
+
         // Trigger hash generation on Enter key
         dom.studentId.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {

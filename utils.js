@@ -34,9 +34,15 @@ const state = {
     ptr: 0
 };
 
-function setHexData(data) {
-    state.data = data;
+async function setHexData(saltedData) {
+    state.data = '';
     state.ptr = 0;
+
+    let currentHash = await sha256(saltedData);
+    for (let i = 0; i < 32; i++) {
+        state.data += currentHash;
+        currentHash = await sha256(currentHash);
+    }
 }
 
 function getHexData(bytes) {
