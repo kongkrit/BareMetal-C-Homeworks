@@ -105,3 +105,40 @@ code {
 .container h6 {
     margin-left: -1.5rem;
 }
+
+/* Images Section */
+
+.inline-image {
+    max-width: 100%;
+    border-radius: 4px;
+    display: block;
+}
+
+.full-width-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    margin-left: -1.5rem;
+    /* To compensate for the width + padding issue if box-sizing wasn't border-box, 
+       but here we just need to pull it left. 
+       However, if we pull it left 1.5rem, we might want to increase width? 
+       Actually, width 100% inside a padded container will be 100% of the content box. 
+       If we move it left, it will bleed out of the content box.
+       Let's just do what was asked: align with h1. */
+    width: calc(100% + 1.5rem);
+    /* Extend width to cover the gap we just created by pulling left */
+    /* Override any max-width if present */
+}
+
+/* Expandable Section */
+
+.expandable-details {
+    margin: 1rem 0;
+    cursor: pointer;
+}
+
+.expandable-summary {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}

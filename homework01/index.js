@@ -9,7 +9,7 @@ const dom = {
 // --- Logic ---
 async function loadMarkdown() {
     try {
-        const response = await fetch('./homework.md');
+        const response = await fetch('./hw1.md');
         
         if (!response.ok) {
             throw new Error(`Failed to load markdown: ${response.status}`);

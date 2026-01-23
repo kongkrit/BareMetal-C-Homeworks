@@ -43,16 +43,16 @@ function generateLinks(studentId) {
 }
 
 function enforceNumericInput(e) {
-    // Replace any non-digit character with empty string
-    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    // Replace any non-digit character with empty string and limit to 10 chars
+    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
 }
 
 async function handleGetHomework() {
     const saltText = dom.salt.textContent;
     const studentId = dom.studentId.value; // No need to trim, it's numbers only
 
-    if (studentId.length < config.minIdLength) {
-        alert(`Student ID must be at least ${config.minIdLength} digits long.`);
+    if (studentId.length !== 10) {
+        alert("Student ID must be exactly 10 digits long.");
         return;
     }
 
