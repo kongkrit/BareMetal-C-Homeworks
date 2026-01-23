@@ -164,14 +164,14 @@ function genProblem4() {
     // Using a simple linear congruential generator for local consistency
     const rand = () => {
         seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return seed;
+        return Math.floor((seed / 4294967296) * 4);
     };
 
     const blinkSequence = [];
     let lastVal = -1;
 
     // Generate first element
-    let firstVal = rand() % 4;
+    let firstVal = rand();
     blinkSequence.push(firstVal);
     lastVal = firstVal;
 
@@ -179,7 +179,7 @@ function genProblem4() {
     for (let i = 0; i < 4; i++) {
         let nextVal;
         do {
-            nextVal = rand() % 4;
+            nextVal = rand();
         } while (nextVal === lastVal);
         blinkSequence.push(nextVal);
         lastVal = nextVal;
@@ -188,7 +188,7 @@ function genProblem4() {
     // Generate last element (MUST not be equal to lastVal AND not equal to firstVal)
     let finalVal;
     do {
-        finalVal = rand() % 4;
+        finalVal = rand();
     } while (finalVal === lastVal || finalVal === firstVal);
     blinkSequence.push(finalVal);
 
