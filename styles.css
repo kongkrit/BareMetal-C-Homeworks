@@ -19,7 +19,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1024px;
     margin: 0 auto;
     background: var(--card);
     padding: 2rem 2rem 2rem 3.5rem;
