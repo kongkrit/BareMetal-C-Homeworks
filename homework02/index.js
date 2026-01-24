@@ -193,19 +193,13 @@ function genProblem4() {
     blinkSequence.push(finalVal);
 
     // Generate output string
-    let blinkSequenceText = "\u00A0\u00A0";
+    let blinkSequenceText = "\u00A0\u00A0<code>";
     blinkSequence.forEach(val => {
         blinkSequenceText += `E00${val} `;
     });
 
-    dom.p411.textContent = blinkSequenceText.trimEnd(); // Using trimEnd just in case, though user logic implies trailing space. User said: blinkSequenceText += `E00`+blinkSequence(in decimal)+` `
-    // " `\u00A0\u00A0" at start.
-    // The loop adds space after each.
-    // I will follow the user's loop logic exactly but clean it up if needed.
-    // User requested: blinkSequenceText += `E00`+blinkSequence(in decimal)+` `
-
-    dom.p411.textContent = blinkSequenceText;
-
+    dom.p411.innerHTML = blinkSequenceText.trimEnd()+"</code>";
+    
     dom.p42.innerHTML = `Modify the C code to blink the LED according to the sequence above.<br><br>Remember to load data into <b>ROM</b> of<code>BareMetal-C/sim/04_blah.sim</code>.`;
     dom.p42.innerHTML += `<br><br>Verify that the lights blink according to the sequence above and never ends.`;
 }
@@ -267,4 +261,5 @@ async function loadMarkdown() {
 document.addEventListener('DOMContentLoaded', () => {
     loadMarkdown();
     displayParameters();
+    renderRulesContainer('rules-container');
 });

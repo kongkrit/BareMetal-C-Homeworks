@@ -11,6 +11,7 @@ const dom = {
     salt: byId("salt"),
     studentId: byId("student-id"),
     getHwBtn: byId("get-hw-btn"),
+    rulesContainer: byId("rules-container"),
 };
 
 // --- UI Logic ---
@@ -61,6 +62,7 @@ async function handleGetHomework() {
         const hash = await sha256(inputString);
 
         generateLinks(studentId);
+        if (dom.rulesContainer) dom.rulesContainer.classList.remove('hidden');
 
     } catch (err) {
         console.error("Hashing failed", err);
@@ -70,6 +72,7 @@ async function handleGetHomework() {
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     updateSalt();
+    renderRulesContainer('rules-container');
 
     if (dom.studentId) {
         dom.studentId.addEventListener('input', enforceNumericInput);

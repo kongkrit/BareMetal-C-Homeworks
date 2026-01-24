@@ -37,3 +37,19 @@ async function copyToClipboard(elementId, trimEdges = false) {
     console.warn("Clipboard write failed");
   }
 }
+
+// --- Rules Component ---
+function renderRulesContainer(containerId) {
+  const container = byId(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+      <h2>Rules:</h2>
+      <ul>
+          <li>Do not copy others' work.</li>
+          <li><b>Show the details of all your work.</b></li>
+          <li>Submit your work on time.</li>
+          <li><b>Show your student ID clearly on your submission.</b></li>
+      </ul>
+  `;
+}
