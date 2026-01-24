@@ -149,9 +149,9 @@ function genProblem3() {
     const addrHex = getHexData(1);
     const addr = 0x5000 + parseInt(addrHex, 16);
 
-    dom.p31.textContent = `Suppose we have the following string stored starting at memory address 0x${addr.toString(16).toUpperCase()}:`;
-    dom.p311.textContent = `\u00A0\u00A0${word1} ${word2}`;
-    dom.p32.textContent = `The string begins with "${word1[0]}" and ends with "${word2[word2.length - 1]}". Write the address and data from the above address until the string ends. Do not forget the NUL string termination.`;
+    dom.p31.innerHTML = `Suppose we have the following string stored starting at memory address <code>0x${addr.toString(16).toUpperCase()}</code>:`;
+    dom.p311.innerHTML = `\u00A0\u00A0<code>${word1} ${word2}</code>`;
+    dom.p32.innerHTML = `The string begins with "${word1[0]}" and ends with "${word2[word2.length - 1]}". There is a space between the two words. There is an ASCII code for <code>space</code> as well, and it is not NUL. Also, do not forget the NUL string termination.<br><br>Write the memory address and hex data from the <code>0x${addr.toString(16).toUpperCase()}</code> until the string ends.`;
 }
 
 function genProblem4() {
