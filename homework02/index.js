@@ -1,7 +1,7 @@
 // --- DOM elements ---
 const dom = {
     output: byId("md-output"),
-    parameters: byId("parameters"),
+    studentId: byId("student-id"),
     problems: byId("problems"),
     // Problem 1.1
     p111: byId("p111"),
@@ -214,20 +214,10 @@ function genProblem4() {
 async function displayParameters() {
     const params = new URLSearchParams(window.location.search);
 
-    if (params.size === 0) {
-        const msg = document.createElement('p');
-        msg.textContent = "No parameters received";
-        msg.style.fontStyle = "italic";
-        msg.style.color = "#666";
-        dom.parameters.appendChild(msg);
-        return;
-    }
-
     // Validation
     const errors = [];
     const id = params.get('id');
     const salt = params.get('salt');
-    let hash;
 
     if (id && !validateStudentId(id)) {
         errors.push(`Invalid Student ID: ${id}`);
@@ -239,21 +229,7 @@ async function displayParameters() {
     }
 
     if (errors.length > 0) {
-        dom.parameters.style.display = 'block';
-        dom.parameters.innerHTML = ''; // Clear initial text
-        const header = document.createElement('h3');
-        header.textContent = "Parameter errors";
-        header.style.color = "red";
-        dom.parameters.appendChild(header);
-
-        const ul = document.createElement('ul');
-        errors.forEach(err => {
-            const li = document.createElement('li');
-            li.textContent = err;
-            li.style.color = "red";
-            ul.appendChild(li);
-        });
-        dom.parameters.appendChild(ul);
+        console.error("Parameter errors:", errors);
         return;
     }
 
@@ -261,35 +237,9 @@ async function displayParameters() {
     // If valid, populate problems
     if (id && salt) {
         // We pass the raw salted string to genProblems, which will expand it
+        dom.studentId.innerHTML = `<h3>Student ID: ${id}</h3>`;
         await genProblems(salt + id);
     }
-
-    const ul = document.createElement('ul');
-    params.forEach((value, key) => {
-        const li = document.createElement('li');
-        const codeKey = document.createElement('code');
-        codeKey.textContent = key;
-        const spanVal = document.createElement('span');
-        spanVal.textContent = `: ${value}`;
-
-        li.appendChild(codeKey);
-        li.appendChild(spanVal);
-        ul.appendChild(li);
-    });
-
-    // If we calculated the hash, show it too
-    if (!params.get('hash') && hash) {
-        const li = document.createElement('li');
-        const codeKey = document.createElement('code');
-        codeKey.textContent = 'hash (computed)';
-        const spanVal = document.createElement('span');
-        spanVal.textContent = `: ${hash}`;
-        li.appendChild(codeKey);
-        li.appendChild(spanVal);
-        ul.appendChild(li);
-    }
-
-    dom.parameters.appendChild(ul);
 }
 
 async function loadMarkdown() {
