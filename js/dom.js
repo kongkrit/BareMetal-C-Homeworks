@@ -47,7 +47,7 @@ function renderRulesContainer(containerId) {
       <h2>Rules:</h2>
       <ul>
           <li>Do not copy others' work.</li>
-          <li><b>Show the details of all your work.</b></li>
+          <li><b>Show the details of all your work. Don't give unjustified answers.</b></li>
           <li>Submit your work on time.</li>
           <li><b>Show your student ID clearly on your submission.</b></li>
       </ul>
