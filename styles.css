@@ -117,7 +117,7 @@ code {
 /* Indent list items */
 .container ul, 
 .container ol {
-  padding-left: 1.5rem;
+  padding-left: 0rem;
   list-style-position: outside;
   margin-left: 1.5rem;
 }
