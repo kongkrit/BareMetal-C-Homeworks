@@ -7,6 +7,8 @@
     "files.eol": "\n",
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
+    
+    // Antigravity Formatting
     "editor.formatOnSave": false,
 
     // Language-specific overrides (Windows Scripts must be CRLF)
