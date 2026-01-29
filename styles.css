@@ -157,6 +157,11 @@ code {
     padding: 0.5rem 1rem;
 }
 
+.gray60-background {
+    background-color: #606060;
+    padding: 0.5rem 1rem;
+}
+
 .dark-red-foreground {
     color: #c00000;
 }
