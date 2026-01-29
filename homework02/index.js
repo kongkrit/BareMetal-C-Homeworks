@@ -34,26 +34,7 @@ const dom = {
 };
 
 // --- Helpers ---
-function hexToBinary(hex) {
-    let bin = "";
-    for (let i = 0; i < hex.length; i++) {
-        const d = parseInt(hex[i], 16);
-        bin += d.toString(2).padStart(4, '0');
-    }
-    return bin;
-}
-
-function hexToSignedDecimal(hex, bytes) {
-    const bits = BigInt(bytes * 8);
-    let val = BigInt("0x" + hex);
-    const maxVal = 1n << bits;
-    const midVal = 1n << (bits - 1n);
-
-    if (val >= midVal) {
-        val -= maxVal;
-    }
-    return Number(val);
-}
+// Helpers are now imported from ../js/utils.js
 
 async function genProblems(saltedData) {
     // We treat the hash as a stream of bytes (hex pairs).
