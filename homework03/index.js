@@ -9,7 +9,43 @@ async function genProblems(saltedData) {
     // We treat the hash as a stream of bytes (hex pairs).
     await setHexData(saltedData);
     
-    // Skeleton: Add problem generation calls here
+    genProblem();
+}
+
+function genProblem() {
+    let validHex = null;
+
+    // We loop until we find a byte that satisfies the condition
+    while (!validHex) {
+        // 0. Use getHexData(1) to get random 8-bit data
+        const byteHex = getHexData(1);
+        if (!byteHex) break; // sanity check
+
+        const val = parseInt(byteHex, 16);
+
+        // 1. From 0, generate an 8-bit binary code that has the following properties:
+        // contains two to six 1's.
+        let count = 0;
+        let temp = val;
+        while (temp > 0) {
+            if (temp & 1) count++;
+            temp >>= 1;
+        }
+
+        if (count >= 2 && count <= 6) {
+            validHex = byteHex;
+        }
+    }
+
+    // 2. Display the result at #binary-code innerHTML.
+    if (validHex) {
+        const binary = hexToBinary(validHex).split('').join(' ');
+        byId("binary-code").innerHTML = `\u00A0\u00A0\u00A0<code>${binary}</code><br><br>`;
+    } else {
+        const el = byId("binary-code");
+        el.classList.add("pale-yellow-background", "dark-red-foreground");
+        el.innerHTML = `\u00A0\u00A0\u00A0<code>Contact Instructor: You may win a lottery soon!</code><br><br>`;
+    }
 }
 
 // --- Logic ---

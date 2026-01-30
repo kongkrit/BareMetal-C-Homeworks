@@ -20,15 +20,42 @@
 
         <div id="rules-container" class="pale-yellow-background dark-red-foreground"></div>
         <div id="problems">
-            <h2>Problems:</h2>
+            <h2>Problem:</h2>
             <div id="problem1">
+                <h3>Decoding Device</h3>
+                <ul>
+                    <li><strong>Update Repository:</strong> Use GitHub Desktop to update
+                        <code>BareMetal-C</code> (Fetch origin &rarr; Pull).<br><br>
+                    </li>
+                    <li><strong>Target Code:</strong> You are assigned the following 8-bit binary value:
+                        <br><br>
+                    </li>
+                    <li id="binary-code" class="no-dot"></li>
+                    <li><strong>Input Logic:</strong> Write a C program that reads the toggle switches
+                        mapped to <code>0xC010</code>–<code>0xC017</code>.<br><br>
+                    </li>
+                    <li><strong>Bit Mapping:</strong> Map the leftmost bit of the code to <code>0xC010</code> and
+                        the rightmost bit (LSB) of the code to <code>0xC017</code>.<br><br>
+                    </li>
+                    <li><strong>Output Logic:</strong> If the switch inputs match the target code,
+                        turn <strong>ON</strong> the LED at <code>0xE000</code>.
+                        Otherwise, turn it <strong>OFF</strong>.<br><br>
+                    </li>
+                    <li><strong>Implementation:</strong> Complete the existing source file 
+                        at <code>BareMetal-C/code/homework03/match_code.c</code>.<br><br>
+                    </li>
+                    <li><strong>Verification:</strong> Load your compiled <code>.bin</code> into
+                        <code>hw3.sim</code> and verify it behaves as expected.<br><br></li>
+                    <li><strong>Submission:</strong> Submit your final <code>.c</code> file.<br><br></li>
+                </ul>
             </div>
-            <div id="problem2">
-            </div>
-            <div id="problem3">
-            </div>
-            <div id="problem4">
-            </div>
+        </div>
+        <div id="appendix">
+            <h2>Appendix:</h2>
+            <details class="expandable-details">
+                <summary class="expandable-summary">Click to see <code>hw3.sim</code></summary>
+                <img class="inline-image" src="hw3.png" alt="Hardware 3">
+            </details>
         </div>
     </div>
     <script src="../js/dom.js"></script>
