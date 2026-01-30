@@ -194,7 +194,9 @@ async function displayParameters() {
     const id = params.get('id');
     const salt = params.get('salt');
 
-    if (id && !validateStudentId(id)) {
+    if (!id) {
+        errors.push(`Missing Student ID parameter`);
+    } else if (!validateStudentId(id)) {
         errors.push(`Invalid Student ID: ${id}`);
     }
     if (!salt) {
@@ -205,6 +207,8 @@ async function displayParameters() {
 
     if (errors.length > 0) {
         console.error("Parameter errors:", errors);
+        dom.studentId.className = "gray60-background";
+        dom.studentId.innerHTML = errors.join("<br>");
         return;
     }
 
