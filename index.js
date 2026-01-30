@@ -39,6 +39,13 @@ function generateLinks(studentId) {
     const saltText = dom.salt.textContent;
     const fragment = document.createDocumentFragment();
 
+    if (studentId === '0000000000') {
+        const a = document.createElement('a');
+        a.href = `./homework/index.html?id=${studentId}&salt=${saltText}`;
+        a.textContent = 'homework';
+        fragment.appendChild(a);
+    }
+
     for (let i = 1; i <= config.maxHomeworks; i++) {
         const numStr = i.toString().padStart(config.padLength, '0');
         const folderName = `homework${numStr}`;
