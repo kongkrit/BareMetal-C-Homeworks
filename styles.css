@@ -122,6 +122,10 @@ code {
   margin-left: 1.5rem;
 }
 
+.no-dot {
+  list-style: none;
+}
+
 /* Images Section */
 
 .inline-image {
