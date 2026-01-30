@@ -73,7 +73,7 @@ async function setHexData(saltedData) {
     state.ptr = 0;
 
     let currentHash = await sha256(saltedData);
-    for (let i = 0; i < 32; i++) {
+    for (let i = 0; i < 64; i++) {
         state.data += currentHash;
         currentHash = await sha256(currentHash);
     }
