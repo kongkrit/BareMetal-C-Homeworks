@@ -4,33 +4,37 @@ const dom = {
     studentId: byId("student-id"),
     problems: byId("problems"),
     // Problem 1.1
-    p111: byId("p111"),
-    p112: byId("p112"),
-    p113: byId("p113"),
+    p111: byId("p111"), a111: byId("a111"),
+    p112: byId("p112"), a112: byId("a112"),
+    p113: byId("p113"), a113: byId("a113"),
     // Problem 1.2
-    p121: byId("p121"),
-    p122: byId("p122"),
-    p123: byId("p123"),
+    p121: byId("p121"), a121: byId("a121"),
+    p122: byId("p122"), a122: byId("a122"),
+    p123: byId("p123"), a123: byId("a123"),
     // Problem 1.3
-    p131: byId("p131"),
-    p132: byId("p132"),
-    p133: byId("p133"),
+    p131: byId("p131"), a131: byId("a131"),
+    p132: byId("p132"), a132: byId("a132"),
+    p133: byId("p133"), a133: byId("a133"),
     // Problem 1.4
-    p141: byId("p141"),
-    p142: byId("p142"),
-    p143: byId("p143"),
+    p141: byId("p141"), a141: byId("a141"),
+    p142: byId("p142"), a142: byId("a142"),
+    p143: byId("p143"), a143: byId("a143"),
     // Problem 2
     p21: byId("p21"),
     p211: byId("p211"),
     p22: byId("p22"),
+    a2: byId("a2"),
+    a22: byId("a22"),
     // Problem 3
     p31: byId("p31"),
     p311: byId("p311"),
     p32: byId("p32"),
+    a3: byId("a3"),
     // Problem 4
     p41: byId("p41"),
     p411: byId("p411"),
     p42: byId("p42"),
+    a4: byId("a4"),
 };
 
 // --- Helpers ---
@@ -46,27 +50,60 @@ async function genProblems(saltedData) {
 }
 
 function genProblem1() {
-    // P1.1: Binary inputs
-    dom.p111.textContent = "\u00A0\u00A0a) [1-byte]: " + hexToBinary(getHexData(1));
-    dom.p112.textContent = "\u00A0\u00A0b) [2-byte]: " + hexToBinary(getHexData(2));
-    dom.p113.textContent = "\u00A0\u00A0c) [4-byte]: " + hexToBinary(getHexData(4));
+    // P1.1: Binary inputs -> Answer: Decimal
+    let vals = [
+        { bytes: 1, dom: dom.p111, ans: dom.a111 },
+        { bytes: 2, dom: dom.p112, ans: dom.a112 },
+        { bytes: 4, dom: dom.p113, ans: dom.a113 },
+    ];
+    vals.forEach(v => {
+        const hex = getHexData(v.bytes);
+        const binary = hexToBinary(hex);
+        v.dom.textContent = "\u00A0\u00A0" + (v.bytes === 1 ? "a" : v.bytes === 2 ? "b" : "c") + ") [ " + v.bytes + "-byte]: " + binary;
+        v.ans.innerHTML = "Answer: <br>" + detailedBinaryToDecimal(binary).replace(/\n/g, "<br>");
+    });
 
-    // P1.2: Decimal inputs (from subsequent hash bytes treated as signed)
-    dom.p121.textContent = "\u00A0\u00A0a) [1-byte]: " + hexToSignedDecimal(getHexData(1), 1);
-    dom.p122.textContent = "\u00A0\u00A0b) [2-byte]: " + hexToSignedDecimal(getHexData(2), 2);
-    dom.p123.textContent = "\u00A0\u00A0c) [4-byte]: " + hexToSignedDecimal(getHexData(4), 4);
+    // P1.2: Decimal inputs -> Answer: Binary (2's comp)
+    vals = [
+        { bytes: 1, dom: dom.p121, ans: dom.a121 },
+        { bytes: 2, dom: dom.p122, ans: dom.a122 },
+        { bytes: 4, dom: dom.p123, ans: dom.a123 },
+    ];
+    vals.forEach(v => {
+        const hex = getHexData(v.bytes);
+        const decimal = hexToSignedDecimal(hex, v.bytes).toString();
+        v.dom.textContent = "\u00A0\u00A0" + (v.bytes === 1 ? "a" : v.bytes === 2 ? "b" : "c") + ") [ " + v.bytes + "-byte]: " + decimal;
+        // detailedDecimalToBinary takes (decimalText, numHexDigits)
+        // numHexDigits = bytes * 2
+        v.ans.innerHTML = "Answer: <br>" + detailedDecimalToBinary(decimal, v.bytes * 2).replace(/\n/g, "<br>");
+    });
 
-    // P1.3: Hex inputs (HTML says: Convert 2's comp Hex to Decimal)
-    // We display Hex.
-    dom.p131.textContent = "\u00A0\u00A0a) [1-byte]: 0x" + getHexData(1);
-    dom.p132.textContent = "\u00A0\u00A0b) [2-byte]: 0x" + getHexData(2);
-    dom.p133.textContent = "\u00A0\u00A0c) [4-byte]: 0x" + getHexData(4);
+    // P1.3: Convert 2's comp Hex to Decimal
+    vals = [
+        { bytes: 1, dom: dom.p131, ans: dom.a131 },
+        { bytes: 2, dom: dom.p132, ans: dom.a132 },
+        { bytes: 4, dom: dom.p133, ans: dom.a133 },
+    ];
+    vals.forEach(v => {
+        const hex = getHexData(v.bytes);
+        v.dom.textContent = "\u00A0\u00A0" + (v.bytes === 1 ? "a" : v.bytes === 2 ? "b" : "c") + ") [ " + v.bytes + "-byte]: 0x" + hex;
+        // detailedHexToDecimal takes "0x..."
+        v.ans.innerHTML = "Answer: <br>" + detailedHexToDecimal("0x" + hex).replace(/\n/g, "<br>");
+    });
 
-    // P1.4: Decimal inputs (HTML says: Convert Decimal to 2's comp Hex)
-    // We display Decimal.
-    dom.p141.textContent = "\u00A0\u00A0a) [1-byte]: " + hexToSignedDecimal(getHexData(1), 1);
-    dom.p142.textContent = "\u00A0\u00A0b) [2-byte]: " + hexToSignedDecimal(getHexData(2), 2);
-    dom.p143.textContent = "\u00A0\u00A0c) [4-byte]: " + hexToSignedDecimal(getHexData(4), 4);
+    // P1.4: Convert Decimal to 2's comp Hex
+    vals = [
+        { bytes: 1, dom: dom.p141, ans: dom.a141 },
+        { bytes: 2, dom: dom.p142, ans: dom.a142 },
+        { bytes: 4, dom: dom.p143, ans: dom.a143 },
+    ];
+    vals.forEach(v => {
+        const hex = getHexData(v.bytes);
+        const decimal = hexToSignedDecimal(hex, v.bytes).toString();
+        v.dom.textContent = "\u00A0\u00A0" + (v.bytes === 1 ? "a" : v.bytes === 2 ? "b" : "c") + ") [ " + v.bytes + "-byte]: " + decimal;
+        // detailedDecimalToHex takes (decimalText, numHexDigits)
+        v.ans.innerHTML = "Answer: <br>" + detailedDecimalToHex(decimal, v.bytes * 2).replace(/\n/g, "<br>");
+    });
 }
 
 function genProblem2() {
@@ -97,9 +134,16 @@ function genProblem2() {
     const order = permutations[orderSeed];
 
     let seedText = "";
+    let memoryTable = "Answer (Memory Map):<br>";
+    let currentAddr = address;
 
     order.forEach((bytes, index) => {
-        const hex = getHexData(bytes);
+        const hex = getHexData(bytes); // This is the value in Hex (Big Endian representation of number)
+        // Note: For Memory map, typical Little Endian is used.
+        // Let's show both or assume Little Endian (standard). 
+        // We will break hex into bytes.
+        
+        // Value info
         const decimalValue = hexToSignedDecimal(hex, bytes);
         let typeStr = "";
 
@@ -108,6 +152,19 @@ function genProblem2() {
         else if (bytes === 4) typeStr = "int32_t";
 
         seedText += `\u00A0\u00A0${typeStr} data, decimal value ${decimalValue}`;
+        
+        // Memory Map Construction
+        // Hex string comes as Big Endian (e.g. 1234 for 0x1234). 
+        // Little Endian in memory: 34 at addr, 12 at addr+1.
+        
+        for (let i = bytes - 1; i >= 0; i--) {
+            // substring(i*2, i*2+2) extracts bytes from R-to-L (Little Endian)
+            // No, wait. 
+            // hex="1234". i=1: 34. i=0: 12. Correct for LE.
+            const byteVal = hex.substring(i*2, i*2+2);
+            memoryTable += `0x${currentAddr.toString(16).toUpperCase()}: 0x${byteVal}<br>`;
+            currentAddr++;
+        }
 
         if (index < order.length - 1) {
             seedText += "\n";
@@ -119,6 +176,7 @@ function genProblem2() {
     // Calculate end address for p22? The prompt says "Write Memory address and contents in hex from " + address from #p2
     // Assuming it refers to the starting address we calculated.
     dom.p22.textContent = `Write Memory address and contents in hex from 0x${address.toString(16).toUpperCase()}.`;
+    dom.a22.innerHTML = memoryTable;
 }
 
 function genProblem3() {
@@ -132,7 +190,23 @@ function genProblem3() {
 
     dom.p31.innerHTML = `Suppose we have the following string stored starting at memory address <code>0x${addr.toString(16).toUpperCase()}</code>:`;
     dom.p311.innerHTML = `\u00A0\u00A0<code>${word1} ${word2}</code>`;
+    
+    // Construct the string
+    const fullString = `${word1} ${word2}\0`;
+    let answerHtml = "Answer (Memory Map):<br>";
+    let currentAddr = addr;
+    
+    // Convert to ASCII Hex
+    for(let i=0; i<fullString.length; i++) {
+        const charCode = fullString.charCodeAt(i);
+        const hexCode = charCode.toString(16).toUpperCase().padStart(2, '0');
+        const charDisplay = charCode === 0 ? "NUL" : fullString[i];
+        answerHtml += `0x${currentAddr.toString(16).toUpperCase()}: 0x${hexCode} ('${charDisplay}')<br>`;
+        currentAddr++;
+    }
+
     dom.p32.innerHTML = `The string begins with "${word1[0]}" and ends with "${word2[word2.length - 1]}". There is a space between the two words. There is an ASCII code for <code>space</code> as well, and it is not NUL. Also, do not forget the NUL string termination.<br><br>Write the memory address and hex data from the <code>0x${addr.toString(16).toUpperCase()}</code> until the string ends.`;
+    dom.a3.innerHTML = answerHtml;
 }
 
 function genProblem4() {
@@ -183,6 +257,9 @@ function genProblem4() {
     
     dom.p42.innerHTML = `Modify the C code to blink the LED according to the sequence above.<br><br>Remember to load data into <b>ROM</b> of<code>BareMetal-C/sim/04_blah.sim</code>.`;
     dom.p42.innerHTML += `<br><br>Verify that the lights blink according to the sequence above and never ends.`;
+
+    const cArray = blinkSequence.map(v => `0xE00${v}`).join(", ");
+    dom.a4.innerHTML = `Answer: <br>Sequence: ${blinkSequence.join(" -> ")}<br>C Array: <code>{ ${cArray} }</code>`;
 }
 
 // --- Logic ---
@@ -190,6 +267,11 @@ async function displayParameters() {
     const params = new URLSearchParams(window.location.search);
 
     // Validation
+    const solutionsAnchor = document.querySelector("#solutions-link a");
+    if (solutionsAnchor) {
+        solutionsAnchor.href += window.location.search;
+    }
+
     const errors = [];
     const id = params.get('id');
     const salt = params.get('salt');
@@ -242,9 +324,24 @@ async function loadMarkdown() {
     }
 }
 
+async function ss_check() {
+    try {
+        if (typeof ss === 'undefined' || typeof sskt === 'undefined' || typeof sskk === 'undefined') return;
+
+        const sshash = await sha256(ss);
+        if (sshash === sskt || sshash === sskk) {
+            const solutions = document.querySelectorAll('.solutions');
+            solutions.forEach(el => el.style.display = 'block');
+        }
+    } catch (e) {
+        console.warn("ss check failed", e);
+    }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadMarkdown();
     displayParameters();
     renderRulesContainer('rules-container');
+    ss_check();
 });
