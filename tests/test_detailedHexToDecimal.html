@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Hex</title>
+    <script src="../js/utils.js"></script>
+</head>
+<body>
+    <pre id="output"></pre>
+    <script>
+        const output = document.getElementById("output");
+        function log(msg) {
+            output.textContent += msg + "\n";
+        }
+
+        log("Test 1: 0x7F (127)");
+        log(detailedHexToDecimal("0x7F"));
+        
+        log("\nTest 2: 0x80 (-128)");
+        log(detailedHexToDecimal("0x80"));
+        
+        log("\nTest 3: 0xFF (-1)");
+        log(detailedHexToDecimal("0xFF"));
+        
+        log("\nTest 4: 0x800 (-2048)");
+        log(detailedHexToDecimal("0x800"));
+        
+        log("\nTest 5: 0x123 (291)");
+        log(detailedHexToDecimal("0x123"));
+
+        log("\nTest 5: 0x8023 (-32733)");
+        log(detailedHexToDecimal("0x8023"));
+    </script>
+</body>
+</html>

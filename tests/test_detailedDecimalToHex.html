@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Decimal to Hex</title>
+    <script src="../js/utils.js"></script>
+</head>
+<body>
+    <pre id="output"></pre>
+    <script>
+        const output = document.getElementById("output");
+        function log(msg) {
+            output.textContent += msg + "\n";
+        }
+
+        log("Test 1: 123 (positive, 2-byte default or explicit?) -> numHexDigits=2");
+        log(detailedDecimalToHex("123", 2));
+        
+        log("\nTest 2: -8399 (negative, 4 digits)");
+        log(detailedDecimalToHex("-8399", 4));
+        
+        log("\nTest 3: -1 (negative, 2 digits)");
+        log(detailedDecimalToHex("-1", 2));
+
+        log("\nTest 4: 0 (2 digits)");
+        log(detailedDecimalToHex("0", 2));
+
+        log("\nTest 5: Error check 'ABC'");
+        log(detailedDecimalToHex("ABC", 2));
+    </script>
+</body>
+</html>

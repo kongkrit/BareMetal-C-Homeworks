@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verification</title>
+    <script src="../js/utils.js"></script>
+</head>
+<body>
+    <pre id="output"></pre>
+    <script>
+        const output = document.getElementById("output");
+        function log(msg) {
+            output.textContent += msg + "\n";
+        }
+
+        log("Test 1: 0b00111011");
+        log(detailedBinaryToDecimal("0b00111011"));
+        
+        log("\nTest 2: 0b11");
+        log(detailedBinaryToDecimal("0b11"));
+        
+        log("\nTest 3: 101");
+        log(detailedBinaryToDecimal("101"));
+
+        log("\nTest 4: 0b10101011 (-85)");
+        log(detailedBinaryToDecimal("0b10101011"));
+
+        log("\nTest 5: 0b1111 (-1)");
+        log(detailedBinaryToDecimal("0b1111"));
+        
+        log("\nTest 6: 0b0111 (7)");
+        log(detailedBinaryToDecimal("0b0111"));
+
+        log("\nTest 7: 0b1110110101101111101011000001 (-19465535)");
+        log(detailedBinaryToDecimal("0b1110110101101111101011000001"));
+
+        log("\nTest 8: 0b011101010011 (1875)");
+        log(detailedBinaryToDecimal("0b011101010011"));
+    </script>
+</body>
+</html>
