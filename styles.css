@@ -1,5 +1,6 @@
 :root {
     --bg: #1a1a1a;
+    --bg-light: #3d3d3d;
     --fg: #e0e0e0;
     --card: #2d2d2d;
     --code: #252525;
@@ -168,4 +169,12 @@ code {
 
 .dark-red-foreground {
     color: #c00000;
+}
+
+/* Solution style */
+.solutions {
+    display: none;
+    color: var(--fg);
+    background-color: var(--bg-light);
+    margin-left: 20px;
 }
