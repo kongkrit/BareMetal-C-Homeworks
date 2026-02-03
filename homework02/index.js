@@ -3,6 +3,8 @@ const dom = {
     output: byId("md-output"),
     studentId: byId("student-id"),
     problems: byId("problems"),
+    img1: byId("img1"),
+    coolbox: byId("coolbox"),
     // Problem 1.1
     p111: byId("p111"), a111: byId("a111"),
     p112: byId("p112"), a112: byId("a112"),
@@ -324,24 +326,24 @@ async function loadMarkdown() {
     }
 }
 
-async function ss_check() {
-    try {
-        if (typeof ss === 'undefined' || typeof sskt === 'undefined' || typeof sskk === 'undefined') return;
-
-        const sshash = await sha256(ss);
-        if (sshash === sskt || sshash === sskk) {
-            const solutions = document.querySelectorAll('.solutions');
-            solutions.forEach(el => el.style.display = 'block');
-        }
-    } catch (e) {
-        console.warn("ss check failed", e);
-    }
-}
-
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     loadMarkdown();
     displayParameters();
     renderRulesContainer('rules-container');
-    ss_check();
+    if (dom.coolbox) {
+        const check = debounce(async () => {
+            const printLayoutElements = document.querySelectorAll('.print-layout');
+            if (await ssCheck(dom.coolbox.value)) {
+                printLayoutElements.forEach(el => el.style.display = 'block');
+            } else {
+                printLayoutElements.forEach(el => el.style.display = 'none');
+            }
+        }, 500);
+        dom.coolbox.addEventListener('input', check);
+    }
+
+    if (dom.img1) {
+        dom.img1.addEventListener('click', handleElementClick(dom.coolbox));
+    }
 });
