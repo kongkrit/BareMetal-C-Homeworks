@@ -48,9 +48,9 @@ async function displayParameters() {
     }
 }
 
-async function loadMarkdown() {
+async function loadMarkdown(filename, element) {
     try {
-        const response = await fetch('./hw.md');
+        const response = await fetch(filename);
 
         if (!response.ok) {
             throw new Error(`Failed to load markdown: ${response.status}`);
@@ -61,17 +61,17 @@ async function loadMarkdown() {
         // Convert Markdown to HTML using the global 'marked' library
         const htmlContent = marked.parse(rawText);
 
-        dom.output.innerHTML = htmlContent;
+        element.innerHTML = htmlContent;
 
     } catch (err) {
         console.error(err);
-        dom.output.innerHTML = `<p style="color:red">Error loading content: ${err.message}</p>`;
+        element.innerHTML = `<p style="color:red">Error loading content: ${err.message}</p>`;
     }
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    loadMarkdown();
+    loadMarkdown('./hw.md', dom.output);
     displayParameters();
     renderRulesContainer('rules-container');
 });
