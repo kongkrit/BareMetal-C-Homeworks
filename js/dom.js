@@ -1,18 +1,18 @@
-  // --- Utility ---
-  const byId = id  => document.getElementById(id);
-  const qs   = sel => document.querySelector(sel);
-  const qsa = sel => Array.from(document.querySelectorAll(sel));
+// --- Utility ---
+const byId = id  => document.getElementById(id);
+const qs   = sel => document.querySelector(sel);
+const qsa = sel => Array.from(document.querySelectorAll(sel));
 
-  // debounce wrapper
-  function debounce(fn, delay = 100) {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(null, args), delay);
-    };
-  }
+// debounce wrapper
+function debounce(fn, delay = 100) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn.apply(null, args), delay);
+  };
+}
 
-  // --- Modern clipboard helper with fallback ---
+// --- Modern clipboard helper with fallback ---
 async function copyToClipboard(elementId, trimEdges = false) {
   const el = document.getElementById(elementId);
   let text = el.value ?? '';
@@ -36,6 +36,33 @@ async function copyToClipboard(elementId, trimEdges = false) {
   } catch {
     console.warn("Clipboard write failed");
   }
+}
+
+// --- Easter Egg ---
+function handleElementClick(elToReveal) {
+    const CLICK_THRESHOLD = 5;
+    const CLICK_TIME_LIMIT = 2500; // 2 seconds
+    let clickCount = 0;
+    let clickTimer = null;
+
+    return function() {
+        clickCount++;
+        if (clickCount === 1) {
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+                clickTimer = null;
+            }, CLICK_TIME_LIMIT);
+        }
+
+        if (clickCount >= CLICK_THRESHOLD) {
+            clearTimeout(clickTimer);
+            clickCount = 0;
+            clickTimer = null;
+            if (elToReveal) {
+                elToReveal.classList.remove('hidden');
+            }
+        }
+    };
 }
 
 // --- Rules Component ---

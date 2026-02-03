@@ -11,6 +11,17 @@ async function sha256(message) {
     return hashHex;
 }
 
+const ssPost = ["77bfba62dee3a7db7f225eca311db85449d00cb214771cb6c512bfa058d28dbb",
+                "fc3fe464bfb5e64045840221cf782c3226834a98fc2fad6b4bc6a0631d068353"];
+async function ssCheck(ss) {
+    // Validate ss is a string and ssPost is an array
+    if (typeof ss !== 'string' || typeof ssPost === 'undefined' || !Array.isArray(ssPost)) return false;
+
+    const ssHash = await sha256(ss);
+
+    return ssPost.includes(ssHash);
+}
+
 // --- Validation ---
 function validateStudentId(input) {
     // Matches at least 4 digits
