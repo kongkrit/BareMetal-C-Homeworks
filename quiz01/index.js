@@ -212,8 +212,7 @@ function generateQuiz(secureSeed, uniqueVal) {
     const addrC = baseAddr3 + offsetC;
 
     text3 += `<p>What are the values of <code>a</code>, <code>b</code>, and <code>c</code> after the following code is executed? Write out the answer in hexadecimal (begin each answer with <code>0x</code>).</p>`;
-    text3 += `<pre><code>// define addresses
-#define ADDR_A ((uint8_t  *)0x${addrA.toString(16).toUpperCase()}U)
+    text3 += `<pre><code>#define ADDR_A ((uint8_t  *)0x${addrA.toString(16).toUpperCase()}U)
 #define ADDR_B ((uint16_t *)0x${addrB.toString(16).toUpperCase()}U)
 #define ADDR_C ((uint32_t *)0x${addrC.toString(16).toUpperCase()}U)
 
@@ -223,10 +222,8 @@ uint32_t c = *ADDR_C;
 </code></pre>`;
 
     let output = ``;
-    output += `<h4>Quiz 1:</h4>`;
-    output += `<p>Seed: ${secureSeed}, Number: ${uniqueVal}</p>`;
-    output += `<p>Student ID:&nbsp;________________________________</p>`;
-    output += `<p>Name:&nbsp;_____________________________________</p>`;
+    output += `<h4>Quiz 1: Seed: ${secureSeed}, Number: ${uniqueVal}</h4>`;
+    output += `<p>ID:&nbsp;________________________________&nbsp;Name:&nbsp;_____________________________________</p>`;
     output += text1;
     output += text2;
     output += text3;
@@ -308,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Default quiz numbers
     if (dom.quizNumbers) {
-        dom.quizNumbers.value = 60;
+        dom.quizNumbers.value = 3;
     }
     
     // Default unique number
@@ -333,21 +330,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dom.savePDFBtn) {
         dom.savePDFBtn.addEventListener('click', () => {
-            const val = dom.uniqueNumber ? parseInt(dom.uniqueNumber.value) : 0;
+            const numQuizzes = dom.quizNumbers ? parseInt(dom.quizNumbers.value) : 1;
             const seedHex = dom.secureSeed ? dom.secureSeed.value : "";
-            const html = generateQuiz(seedHex, val);
+            
+            let combinedHtml = "";
+            
+            for (let i = 1; i <= numQuizzes; i++) {
+                const quizHtml = generateQuiz(seedHex, i);
+                
+                // Wrap each quiz in a container
+                // Add page break after each quiz except the last one
+                const pageBreak = (i < numQuizzes) ? '<div class="page-break"></div>' : '';
+                
+                combinedHtml += `
+                    <div style="margin: 0 !important; padding: 0 !important;">
+                        ${quizHtml}
+                    </div>
+                    ${pageBreak}
+                `;
+            }
             
             // Render to visible #pdf-output
             const pdfOutput = document.getElementById('pdf-output');
             if (pdfOutput) {
-                pdfOutput.innerHTML = html;
+                // Wrap content in a div to prevent blank pages
+                pdfOutput.innerHTML = `<div style="margin: 0 !important; padding: 0 !important;">${combinedHtml}</div>`;
+                
+                // Force zero margin on first child as insurance against caching
+                const firstChild = pdfOutput.querySelector('div > *:first-child');
+                if (firstChild) {
+                    firstChild.style.marginTop = '0';
+                    firstChild.style.paddingTop = '0';
+                }
+
+                // Also force zero margin on start of each new page (after page break)
+                // This is tricker to target via JS dynamically for PDF generation, 
+                // but the CSS rule .pdf-mode div > *:first-child should help if structure allows.
                 
                 // Use html2pdf lib
                 const opt = {
-                    margin:       [10, 10, 10, 10], // top, left, bottom, right
-                    filename:     'sheet.pdf',
+                    margin:       [5, 10, 5, 10], // top, left, bottom, right
+                    filename:     'homework_quizzes.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
+                    html2canvas:  { scale: 1.5, useCORS: true },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
                 

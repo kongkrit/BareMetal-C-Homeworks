@@ -205,8 +205,8 @@ th {
 .pdf-mode {
     background-color: white !important;
     color: black !important;
-    padding: 20px;
-    border: 1px solid #ccc; /* For visibility on screen */
+    padding: 0;
+    border: 0px solid #ccc; /* For visibility on screen */
 }
 
 /* Force everything inside .pdf-mode to be black on white */
@@ -215,9 +215,37 @@ th {
     background-color: transparent !important;
 }
 
-/* Compact spacing for PDF */
-.pdf-mode h4, 
-.pdf-mode p, 
+/* Remove margins from first and last children to prevent blank pages */
+.pdf-mode > *:first-child,
+.pdf-mode div:first-child,
+.pdf-mode div > *:first-child {
+    margin-top: 0 !important;
+}
+
+.pdf-mode > *:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Compact spacing for PDF - but allow first element to have zero margin */
+.pdf-mode h1,
+.pdf-mode h2,
+.pdf-mode h3,
+.pdf-mode h4,
+.pdf-mode h5,
+.pdf-mode h6 {
+    margin-top: 4px !important;
+    margin-bottom: 8px !important;
+}
+
+.pdf-mode h4:first-child {
+    margin-top: 0 !important;
+}
+
+.pdf-mode p {
+    margin-top: 4px !important;
+    margin-bottom: 6px !important;
+}
+
 .pdf-mode li {
     margin-top: 4px !important;
     margin-bottom: 4px !important;
@@ -226,22 +254,39 @@ th {
 /* Ensure code blocks are visible but clean */
 .pdf-mode code,
 .pdf-mode pre {
-    border: 1px solid #ccc;
+    border: 0px solid #ccc;
     font-family: monospace;
 }
 
 .pdf-mode table {
     margin-bottom: 10px !important;
     border-color: black !important;
-    width: 100%;
+    width: auto !important;
+    table-layout: auto !important;
+    max-width: 100% !important;
 }
 
 .pdf-mode th {
     background-color: #eee !important;
     border-color: black !important;
     font-weight: bold;
+    padding: 4px !important;
+    font-size: 12px !important;
+}
+
+/* Page breaks for batch PDF generation */
+.page-break {
+    page-break-after: always;
+    break-after: page;
+    display: block;
+    height: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .pdf-mode td {
     border-color: black !important;
+    padding: 4px !important;
+    font-size: 12px !important;
+    word-break: break-word !important;
 }
