@@ -94,6 +94,8 @@ pre {
 
 code {
     padding: 0.2rem;
+    white-space: pre-wrap;
+    line-height: 1.5;
 }
 
 .monospace-text {
@@ -111,7 +113,8 @@ code {
 }
 
 .container p,
-.container #link-container {
+.container #homework-link-container,
+.container #quiz-link-container {
     margin-left: 1.5rem;
 }
 
@@ -178,4 +181,67 @@ code {
     background-color: var(--bg-light);
     margin-left: 20px;
     display: none;
+}
+
+/* Table Styles */
+table {
+    border-collapse: collapse;
+    width: auto;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+th, td {
+    border: 1px solid #555;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+th {
+    background-color: #333;
+}
+
+/* PDF/Print Mode - applied to the visible #pdf-output container */
+.pdf-mode {
+    background-color: white !important;
+    color: black !important;
+    padding: 20px;
+    border: 1px solid #ccc; /* For visibility on screen */
+}
+
+/* Force everything inside .pdf-mode to be black on white */
+.pdf-mode * {
+    color: black !important;
+    background-color: transparent !important;
+}
+
+/* Compact spacing for PDF */
+.pdf-mode h4, 
+.pdf-mode p, 
+.pdf-mode li {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Ensure code blocks are visible but clean */
+.pdf-mode code,
+.pdf-mode pre {
+    border: 1px solid #ccc;
+    font-family: monospace;
+}
+
+.pdf-mode table {
+    margin-bottom: 10px !important;
+    border-color: black !important;
+    width: 100%;
+}
+
+.pdf-mode th {
+    background-color: #eee !important;
+    border-color: black !important;
+    font-weight: bold;
+}
+
+.pdf-mode td {
+    border-color: black !important;
 }

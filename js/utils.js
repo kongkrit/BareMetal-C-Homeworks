@@ -12,6 +12,7 @@ async function sha256(message) {
 }
 
 const ssPost = ["77bfba62dee3a7db7f225eca311db85449d00cb214771cb6c512bfa058d28dbb",
+                "60486abe1041bc7364ce2d6cd74347c98e6196d63f3c03424c3848f0f7d0e35f",
                 "fc3fe464bfb5e64045840221cf782c3226834a98fc2fad6b4bc6a0631d068353"];
 async function ssCheck(ss) {
     // Validate ss is a string and ssPost is an array
@@ -392,6 +393,48 @@ function getHexData(bytes) {
     const chunk = state.data.substring(state.ptr, state.ptr + bytes * 2);
     state.ptr += bytes * 2;
     return chunk;
+}
+
+function getSecureRandom(numBytes) {
+    const array = new Uint8Array(numBytes);
+    window.crypto.getRandomValues(array);
+    return Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+let _prngState = 0n;
+
+function initRandom(seedHex) {
+    // Parse hex string to BigInt
+    // Ensure it's treated as unsigned 64-bit integer
+    if (!seedHex) {
+        throw new Error("Seed is required");
+    }
+    // Handle "0x" prefix if present
+    if (seedHex.startsWith("0x")) {
+        seedHex = seedHex.slice(2);
+    }
+    _prngState = BigInt("0x" + seedHex);
+    // Mask to 64 bits
+    _prngState = _prngState & 0xFFFFFFFFFFFFFFFFn;
+    
+    // Return formatted 8-byte hex string
+    return _prngState.toString(16).padStart(16, '0');
+}
+
+function nextRandom64() {
+    // Linear Congruential Generator (LCG)
+    // Using constants from Knuth (MMIX)
+    // a = 6364136223846793005
+    // c = 1442695040888963407
+    // m = 2^64
+    
+    const a = 6364136223846793005n;
+    const c = 1442695040888963407n;
+    const mMask = 0xFFFFFFFFFFFFFFFFn;
+    
+    _prngState = (a * _prngState + c) & mMask;
+    
+    return _prngState.toString(16).padStart(16, '0');
 }
 
 const SLIP39_WORD_LIST = [

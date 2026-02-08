@@ -1,5 +1,6 @@
 const config = {
     maxHomeworks: 4,
+    maxQuiz: 1,
     idLength: 10,
     padLength: 2,
     minIdLength: 4,
@@ -8,7 +9,8 @@ const config = {
 
 // --- DOM elements ---
 const dom = {
-    linkContainer: byId("link-container"),
+    linkContainer: byId("homework-link-container"),
+    quizContainer: byId("quiz-link-container"),
     salt: byId("salt"),
     studentId: byId("student-id"),
     getHwBtn: byId("get-hw-btn"),
@@ -60,6 +62,28 @@ function generateLinks(studentId) {
     dom.linkContainer.appendChild(fragment);
 }
 
+function generateQuizLinks(studentId) {
+    if (!dom.quizContainer) return;
+
+    dom.quizContainer.innerHTML = '';
+
+    const saltText = dom.salt.textContent;
+    const fragment = document.createDocumentFragment();
+
+    for (let i = 1; i <= config.maxQuiz; i++) {
+        const numStr = i.toString().padStart(config.padLength, '0');
+        const folderName = `quiz${numStr}`;
+
+        const a = document.createElement('a');
+        a.href = `./${folderName}/index.html?id=${studentId}&salt=${saltText}`;
+        a.textContent = folderName;
+
+        fragment.appendChild(a);
+    }
+
+    dom.quizContainer.appendChild(fragment);
+}
+
 function enforceNumericInput(e) {
     // Replace any non-digit character with empty string and limit to config.idLength chars
     e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, config.idLength);
@@ -76,6 +100,16 @@ async function handleGetHomework() {
 
     generateLinks(studentId);
     if (dom.rulesContainer) dom.rulesContainer.classList.remove('hidden');
+    
+    if (dom.quizContainer) {
+        if (typeof ssCheck === 'function' && await ssCheck(studentId)) {
+            dom.quizContainer.classList.remove('hidden');
+            generateQuizLinks(studentId);
+        } else {
+            dom.quizContainer.classList.add('hidden');
+        }
+    }
+
     linksGenerated = true;
 }
 
@@ -86,8 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dom.studentId) {
         dom.studentId.addEventListener('input', enforceNumericInput);
-        dom.studentId.addEventListener('input', (e) => {
-            if (linksGenerated) generateLinks(e.target.value);
+        dom.studentId.addEventListener('input', async (e) => {
+            if (linksGenerated) {
+                const val = e.target.value;
+                generateLinks(val);
+
+                if (dom.quizContainer) {
+                    if (typeof ssCheck === 'function' && await ssCheck(val)) {
+                        dom.quizContainer.classList.remove('hidden');
+                        generateQuizLinks(val);
+                    } else {
+                        dom.quizContainer.classList.add('hidden');
+                    }
+                }
+            }
         });
 
         // Trigger hash generation on Enter key
