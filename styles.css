@@ -290,3 +290,10 @@ th {
     font-size: 12px !important;
     word-break: break-word !important;
 }
+
+/* Hide leading br tags in quiz sections for PDF to prevent blank pages */
+.pdf-mode .quiz-section > br:first-child,
+.pdf-mode .quiz-section > br:nth-child(2),
+.pdf-mode .quiz-section > br:nth-child(3) {
+    display: none !important;
+}

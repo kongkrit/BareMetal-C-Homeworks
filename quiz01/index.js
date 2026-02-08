@@ -9,6 +9,7 @@ const dom = {
     genQuizBtn: byId("gen-quiz-btn"),
     savePDFBtn: byId("save-pdf-btn"),
     quiz1: byId("quiz1"),
+    startQuizNumber: byId("start-quiz-number"),
 };
 
 function generateSeed() {
@@ -85,7 +86,7 @@ function generateQuiz(secureSeed, uniqueVal) {
     text1 += `<li>${val1 !== null ? (val1 >= 128 ? val1 - 256 : val1) : 'None found'}</li>`;
     text1 += `<li>${val2 !== null ? (val2 >= 128 ? val2 - 256 : val2) : 'None found'}</li>`;
     text1 += `</ul>`;
-    text1 += `<p>Show how you arrive at your answers.</p>`;
+    text1 += `<p>Show the details of your work.</p>`;
 
     // --- Part 2: Data Structure Quiz ---
     // 1. prepend before: let output = ``;
@@ -141,7 +142,7 @@ function generateQuiz(secureSeed, uniqueVal) {
     text2 += `</ul>`;
     text2 += `<p>Draw the memory layout of these data in the address space starting from <code>0x${baseAddr.toString(16).toUpperCase()}</code> up until the last byte.</p>`;
     text2 += `<p>The answer should contain 2 columns: Address and Data.</p>`;
-    text2 += `<p>The answer should be in the form of a table.</p>`;
+    text2 += `<p>The answer should be in the form of a table. Write the table below, to the right of table of question 3.</p>`;
 
     // --- Part 3: Memory Table Quiz ---
     // base = randomly pick a number between 0x5122-0x5ED8
@@ -221,8 +222,10 @@ uint32_t c = *ADDR_C;
 </code></pre>`;
 
     let output = ``;
+    output += `<h4>&nbsp;</h4>`;
+    output += `<h4>&nbsp;</h4>`;
     output += `<h4>Quiz 1: Seed: ${secureSeed}, Number: ${uniqueVal}</h4>`;
-    output += `<p>ID:&nbsp;________________________________&nbsp;Name:&nbsp;_____________________________________</p>`;
+    output += `<p><br>ID:&nbsp;________________________________&nbsp;Name:&nbsp;_____________________________________</p>`;
     output += text1;
     output += text2;
     output += text3;
@@ -304,7 +307,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Default quiz numbers
     if (dom.quizNumbers) {
-        dom.quizNumbers.value = 3;
+        dom.quizNumbers.value = 25;
+    }
+
+    if (dom.startQuizNumber) {
+        dom.startQuizNumber.value = 1;
     }
     
     if (dom.regenSeedBtn) {
@@ -325,15 +332,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dom.savePDFBtn) {
         dom.savePDFBtn.addEventListener('click', () => {
             const numQuizzes = dom.quizNumbers ? parseInt(dom.quizNumbers.value) : 1;
+            const startQuizNum = dom.startQuizNumber ? parseInt(dom.startQuizNumber.value) : 1;
             const seedHex = dom.secureSeed ? dom.secureSeed.value : "";
             
             let combinedHtml = "";
             
-            for (let i = 1; i <= numQuizzes; i++) {
+            for (let i = startQuizNum; i <= startQuizNum + numQuizzes -1 ; i++) {
                 const quizHtml = generateQuiz(seedHex, i);
                 
-                // Wrap each quiz in a section with page-break-after
                 combinedHtml += `<div class="quiz-section">${quizHtml}</div>`;
+                
+                if (i < numQuizzes) {
+                    combinedHtml += `<div class="page-break"></div>`;
+                }
             }
             
             // Render to visible #pdf-output
@@ -356,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Use html2pdf lib
                 const opt = {
                     margin:       [10, 10, 10, 10], // top, left, bottom, right
-                    filename:     'homework_quizzes.pdf',
+                    filename:     'quizzes.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { scale: 1.5, useCORS: true },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
