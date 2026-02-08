@@ -6,7 +6,6 @@ const dom = {
     secureSeed: byId("secure-seed"),
     quizNumbers: byId("quiz-numbers"),
     regenSeedBtn: byId("regen-seed-btn"),
-    uniqueNumber: byId("unique-number"),
     genQuizBtn: byId("gen-quiz-btn"),
     savePDFBtn: byId("save-pdf-btn"),
     quiz1: byId("quiz1"),
@@ -308,18 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.quizNumbers.value = 3;
     }
     
-    // Default unique number
-    if (dom.uniqueNumber) {
-        dom.uniqueNumber.value = 1;
-    }
-    
     if (dom.regenSeedBtn) {
         dom.regenSeedBtn.addEventListener('click', generateSeed);
     }
     
     if (dom.genQuizBtn) {
         dom.genQuizBtn.addEventListener('click', () => {
-            const val = dom.uniqueNumber ? parseInt(dom.uniqueNumber.value) : 0;
+            const val = 1; // Default to 1 for on-screen preview
             const seedHex = dom.secureSeed ? dom.secureSeed.value : "";
             const html = generateQuiz(seedHex, val);
             if (dom.quiz1) {
@@ -338,16 +332,8 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 1; i <= numQuizzes; i++) {
                 const quizHtml = generateQuiz(seedHex, i);
                 
-                // Wrap each quiz in a container
-                // Add page break after each quiz except the last one
-                const pageBreak = (i < numQuizzes) ? '<div class="page-break"></div>' : '';
-                
-                combinedHtml += `
-                    <div style="margin: 0 !important; padding: 0 !important;">
-                        ${quizHtml}
-                    </div>
-                    ${pageBreak}
-                `;
+                // Wrap each quiz in a section with page-break-after
+                combinedHtml += `<div class="quiz-section">${quizHtml}</div>`;
             }
             
             // Render to visible #pdf-output
@@ -369,11 +355,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Use html2pdf lib
                 const opt = {
-                    margin:       [5, 10, 5, 10], // top, left, bottom, right
+                    margin:       [10, 10, 10, 10], // top, left, bottom, right
                     filename:     'homework_quizzes.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { scale: 1.5, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak:    { mode: ['css', 'legacy'] }
                 };
                 
                 html2pdf().set(opt).from(pdfOutput).save();
