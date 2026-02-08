@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../assets/favicon.png">
+    <title>BareMetal-C Homeworks</title>
+    <link rel="stylesheet" href="../styles.css">
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="../js/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="md-output" class="markdown-body"></div>
+        <div id="student-id"></div>
+        <div id="secure-seed-container">
+            <h4>Secure Seed:</h4>
+            <input type="text" id="secure-seed" placeholder="secure-seed">
+            <button id="regen-seed-btn">Regenerate Seed</button>
+        </div>
+        <div id="quiz-numbers-container">
+            <h4>Number of Quizzes to generate:</h4>
+            <input type="number" id="quiz-numbers" placeholder="numbers">
+            <button id="gen-quiz-btn">Generate Quizzes</button>
+            <button id="save-pdf-btn" style="margin-top:10px;">Save to PDF</button>
+        </div>
+
+        <!-- <div id="rules-container" class="pale-yellow-background dark-red-foreground"></div> -->
+        <div id="quiz-container" style="margin-top:2rem;">
+            <h2>Quizzes:</h2>
+            <div id="quiz1">
+            </div>
+            <div id="quiz2">
+            </div>
+            <div id="quiz3">
+            </div>
+            <div id="quiz4">
+            </div>
+        </div>
+        
+        <hr>
+        
+        <div id="pdf-container">
+             <h2>PDF Preview / Output:</h2>
+             <div id="pdf-output" class="pdf-mode"></div>
+        </div>
+        <div id="appendix">
+            <h2>Appendix:</h2>
+            <details class="expandable-details">
+                <summary class="expandable-summary">Click to expand</code></summary>
+                <p>details here!</p>
+            </details>
+        </div>
+    </div>
+    <script src="../js/dom.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="index.js"></script>
+</body>
+
+</html>
