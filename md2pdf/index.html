@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robust Markdown to PDF</title>
+
+    <style>
+        /* CSS: Simplistic Dark Theme */
+        body { background-color: #1e1e1e; color: #d4d4d4; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; height: 100vh; box-sizing: border-box; }
+        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 15px; height: 100%; }
+        textarea { flex-grow: 1; background-color: #2d2d2d; color: #e0e0e0; border: 1px solid #404040; padding: 15px; font-family: monospace; resize: none; outline: none; }
+        button { background-color: #0e639c; color: white; border: none; padding: 10px 20px; cursor: pointer; font-size: 1rem; align-self: flex-end; }
+        button:hover { background-color: #1177bb; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3/build/pdfmake.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.3/build/vfs_fonts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-to-pdfmake/browser.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <h3>Markdown Input</h3>
+        <textarea id="md-input">
+# Project Omega
+
+## Overview
+This is a **robust** PDF generation test.
+Unlike html2canvas, this text is:
+- Selectable
+- Searchable
+- Vector-based
+
+## Data Table
+| ID | Value | Status |
+|----|-------|--------|
+| 1  | 500   | Active |
+| 2  | 0     | Idle   |
+
+## Code
+```javascript
+console.log("Hello World");
+```
+---PB---
+
+Page 2
+More Content
+This should be on a new page.</textarea>
+<button id="btn-generate">Download PDF</button> </div>
+<script src="index.js"></script>
+
+</body> </html>
