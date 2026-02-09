@@ -1,6 +1,6 @@
 // --- DOM elements ---
 const dom = {
-    output: byId("md-output"),
+    output: byId("readme-output"),
     studentId: byId("student-id"),
     problems: byId("problems"),
     secureSeed: byId("secure-seed"),
@@ -10,7 +10,96 @@ const dom = {
     savePDFBtn: byId("save-pdf-btn"),
     quiz1: byId("quiz1"),
     startQuizNumber: byId("start-quiz-number"),
+    versionNumber: byId("version-number"),
 };
+
+const config = {
+    version: "0.1.12",
+    startNumber: 1,
+    quizCount: 50,
+    pdfStyles: {
+        header: { fontSize: 22, bold: true, alignment: 'center', margin: [0, 0, 0, 20] }
+    },
+    pageBreakToken: '---PB---'
+};
+
+/*
+    Refactored PDF Generation Function
+    - Splits markdown by token
+    - Converts each chunk to HTML then to PDFMake
+    - Handles page breaks manually
+    - Uses defaultStyles for tighter vertical spacing
+*/
+async function generatePDF(markdownText, filename) {
+    try {
+        // Check if libraries are loaded
+        if (typeof window.marked !== 'function' && typeof window.marked?.parse !== 'function') {
+            throw new Error("marked library not loaded");
+        }
+        if (typeof window.htmlToPdfmake !== 'function') {
+            throw new Error("html-to-pdfmake library not loaded");
+        }
+
+        const rawChunks = markdownText.split(config.pageBreakToken);
+        let finalContent = [];
+
+        for (let i = 0; i < rawChunks.length; i++) {
+            const chunk = rawChunks[i].trim();
+            if (!chunk) continue;
+            
+            // 1. Convert Markdown to HTML
+            const html = marked.parse(chunk);
+            
+            // 2. Convert HTML to PDFMake with TIGHT spacing
+            // We keep the aggressive spacing fix from previous steps as the user still wants reduced spacing
+            const chunkContent = htmlToPdfmake(html, {
+                defaultStyles: {
+                    div: { margin: [0, 0, 0, 0] },
+                    p: { margin: [0, 0, 0, 0], fontSize: 11, lineHeight: 1.0 }, // Extremely tight margin
+                    // Headers: top margin 1, bottom margin 1
+                    h1: { margin: [0, 1, 0, 1], lineHeight: 1.1 },
+                    h2: { margin: [0, 1, 0, 1], lineHeight: 1.1 },
+                    h3: { margin: [0, 1, 0, 1], lineHeight: 1.1 },
+                    h4: { margin: [0, 1, 0, 1], fontSize: 13, bold: true, lineHeight: 1.1 },
+                    ul: { margin: [0, 1, 0, 1] },
+                    ol: { margin: [0, 1, 0, 1] },
+                    li: { margin: [0, 0, 0, 0], lineHeight: 1.1 },
+                    table: { margin: [0, 1, 0, 1], fontSize: 11 },
+                    pre: { margin: [0, 0, 0, 0], preserveLeadingSpaces: true },
+                    code: { margin: [0, 0, 0, 0], fontSize: 11, preserveLeadingSpaces: true },
+                    br: { margin: [0, 0, 0, 0], lineHeight: 1.0 }
+                }
+            });
+            
+            if (Array.isArray(chunkContent)) {
+                finalContent.push(...chunkContent);
+            } else {
+                finalContent.push(chunkContent);
+            }
+
+            // Add Page Break if not the last chunk
+            if (i < rawChunks.length - 1) {
+                finalContent.push({ text: '', pageBreak: 'after' });
+            }
+        }
+
+        const docDefinition = {
+            content: finalContent,
+            styles: config.pdfStyles,
+            defaultStyle: { font: 'Roboto', fontSize: 10, lineHeight: 1.1 },
+            // Override html- classes again just in case
+            styles: {
+               // ... (optional, let's trust defaultStyles for now to keep it cleaner, or can re-add if needed)
+            }
+        };
+
+        pdfMake.createPdf(docDefinition).download(filename);
+        
+    } catch (error) {
+        console.error("PDF Generation Failed:", error);
+        alert(`PDF Generation Failed: ${error.message}`);
+    }
+}
 
 function generateSeed() {
     if (dom.secureSeed) {
@@ -81,12 +170,10 @@ function generateQuiz(secureSeed, uniqueVal) {
     }
 
     let text1 = ``;
-    text1 += `<h4>1. Convert the follow decimal numbers to 8-bit 2's complement binary code:</h4>`;
-    text1 += `<ul>`;
-    text1 += `<li>${val1 !== null ? (val1 >= 128 ? val1 - 256 : val1) : 'None found'}</li>`;
-    text1 += `<li>${val2 !== null ? (val2 >= 128 ? val2 - 256 : val2) : 'None found'}</li>`;
-    text1 += `</ul>`;
-    text1 += `<p>Show the details of your work.</p>`;
+    text1 += `#### 1. Convert the follow decimal numbers to 8-bit 2's complement binary code:\n\n`;
+    text1 += `- ${val1 !== null ? (val1 >= 128 ? val1 - 256 : val1) : 'None found'}\n`;
+    text1 += `- ${val2 !== null ? (val2 >= 128 ? val2 - 256 : val2) : 'None found'}\n\n`;
+    text1 += `Show the details of your work.\n\n`;
 
     // --- Part 2: Data Structure Quiz ---
     // 1. prepend before: let output = ``;
@@ -120,8 +207,7 @@ function generateQuiz(secureSeed, uniqueVal) {
     const baseAddr = 0x4000 + baseOffset;
 
     let text2 = ``;
-    text2 += `<h4>2. At the base address <code>0x${baseAddr.toString(16).toUpperCase()}</code>, there are the following data packed as tightly as possible:</h4>`;
-    text2 += `<ul>`;
+    text2 += `#### 2. At the base address \`0x${baseAddr.toString(16).toUpperCase()}\`, there are the following data packed as tightly as possible:\n\n`;
     
     // - for each sequence member
     for (const size of seq) {
@@ -137,12 +223,11 @@ function generateQuiz(secureSeed, uniqueVal) {
             case 4: typeStr = "uint32_t data"; break;
         }
         
-        text2 += `<li><code>${typeStr} ${valString}</code></li>`;
+        text2 += `- \`${typeStr} ${valString}\`\n`;
     }
-    text2 += `</ul>`;
-    text2 += `<p>Draw the memory layout of these data in the address space starting from <code>0x${baseAddr.toString(16).toUpperCase()}</code> up until the last byte.</p>`;
-    text2 += `<p>The answer should contain 2 columns: Address and Data.</p>`;
-    text2 += `<p>The answer should be in the form of a table. Write the table below, to the right of table of question 3.</p>`;
+    text2 += `\nDraw the memory layout of these data in the address space starting from \`0x${baseAddr.toString(16).toUpperCase()}\` up until the last byte.\n\n`;
+    text2 += `The answer should contain 2 columns: Address and Data.\n\n`;
+    text2 += `The answer should be in the form of a table. Write the table below, to the right of table of question 3.\n\n`;
 
     // --- Part 3: Memory Table Quiz ---
     // base = randomly pick a number between 0x5122-0x5ED8
@@ -182,9 +267,9 @@ function generateQuiz(secureSeed, uniqueVal) {
     const baseAddr3 = minBase3 + baseOffset3;
 
     let text3 = ``;
-    text3 += `<h4>3. Given the memory content:</h4>`;
-    text3 += `<table>`;
-    text3 += `<tr><th>Address</th><th>Data (Hex)</th></tr>`;
+    text3 += `#### 3. Given the memory content:\n\n`;
+    text3 += `| Address | Data (Hex) |\n`;
+    text3 += `|:---:|:---:|\n`;
 
     // text3 += a table in text3 from base up to base + 9.
     for (let i = 0; i <= 9; i++) {
@@ -192,12 +277,9 @@ function generateQuiz(secureSeed, uniqueVal) {
         const val = getNextBytePart3();
         const valHex = val.toString(16).toUpperCase().padStart(2, '0');
         
-        text3 += `<tr>`;
-        text3 += `<td><code>0x${addr.toString(16).toUpperCase()}</code></td>`;
-        text3 += `<td><code>0x${valHex}</code></td>`;
-        text3 += `</tr>`;
+        text3 += `| \`0x${addr.toString(16).toUpperCase()}\` | \`0x${valHex}\` |\n`;
     }
-    text3 += `</table>`;
+    text3 += `\n`;
 
     // text3 += randomly generate an address from [base, base+1]
     const offsetA = (getNextBytePart3() % 2); // 0 to 1 
@@ -211,27 +293,25 @@ function generateQuiz(secureSeed, uniqueVal) {
     const offsetC = (getNextBytePart3() % 2) + 5; // 5 to 6
     const addrC = baseAddr3 + offsetC;
 
-    text3 += `<p>What are the values of <code>a</code>, <code>b</code>, and <code>c</code> after the following code is executed? Write out the answer in hexadecimal (begin each answer with <code>0x</code>).</p>`;
-    text3 += `<pre><code>#define ADDR_A ((uint8_t  *)0x${addrA.toString(16).toUpperCase()}U)
+    text3 += `What are the values of \`a\`, \`b\`, and \`c\` after the following code is executed? Write out the answer in hexadecimal (begin each answer with \`0x\`).\n\n`;
+    text3 += `\`\`\`c
+#define ADDR_A ((uint8_t  *)0x${addrA.toString(16).toUpperCase()}U)
 #define ADDR_B ((uint16_t *)0x${addrB.toString(16).toUpperCase()}U)
 #define ADDR_C ((uint32_t *)0x${addrC.toString(16).toUpperCase()}U)
 
 uint8_t  a = *ADDR_A;
 uint16_t b = *ADDR_B;
 uint32_t c = *ADDR_C;
-</code></pre>`;
+\`\`\`\n`;
 
     let output = ``;
-    output += `<h4>&nbsp;</h4>`;
-    output += `<h4>&nbsp;</h4>`;
-    output += `<h4>Quiz 1: Seed: ${secureSeed}, Number: ${uniqueVal}</h4>`;
-    output += `<p><br>ID:&nbsp;________________________________&nbsp;Name:&nbsp;_____________________________________</p>`;
+    output += ``;
+    output += `#### Quiz 1: Ver: ${config.version} Seed: ${secureSeed}, Number: ${uniqueVal}\n`;
+    output += `ID: ________________________________ Name: _____________________________________\n\n`;
     output += text1;
     output += text2;
     output += text3;
     
-    // output += `<p style="font-size:0.8em; color:#888">Random Hex: ${rHex}</p>`;
-
     return output;
 }
 
@@ -301,17 +381,21 @@ async function loadMarkdown(filename, element) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    if (dom.versionNumber) {
+        dom.versionNumber.innerHTML = `<h5>Version: ${config.version}</h5>`;
+    }
+
     loadMarkdown('./quiz.md', dom.output);
     
     generateSeed();
     
     // Default quiz numbers
     if (dom.quizNumbers) {
-        dom.quizNumbers.value = 25;
+        dom.quizNumbers.value = config.quizCount;
     }
 
     if (dom.startQuizNumber) {
-        dom.startQuizNumber.value = 1;
+        dom.startQuizNumber.value = config.startNumber;
     }
     
     if (dom.regenSeedBtn) {
@@ -322,9 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.genQuizBtn.addEventListener('click', () => {
             const val = 1; // Default to 1 for on-screen preview
             const seedHex = dom.secureSeed ? dom.secureSeed.value : "";
-            const html = generateQuiz(seedHex, val);
+            const markdown = generateQuiz(seedHex, val);
             if (dom.quiz1) {
-                dom.quiz1.innerHTML = html;
+                dom.quiz1.innerHTML = marked.parse(markdown);
             }
         });
     }
@@ -335,47 +419,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const startQuizNum = dom.startQuizNumber ? parseInt(dom.startQuizNumber.value) : 1;
             const seedHex = dom.secureSeed ? dom.secureSeed.value : "";
             
-            let combinedHtml = "";
-            
-            for (let i = startQuizNum; i <= startQuizNum + numQuizzes -1 ; i++) {
-                const quizHtml = generateQuiz(seedHex, i);
-                
-                combinedHtml += `<div class="quiz-section">${quizHtml}</div>`;
-                
-                if (i < numQuizzes) {
-                    combinedHtml += `<div class="page-break"></div>`;
-                }
-            }
-            
-            // Render to visible #pdf-output
-            const pdfOutput = document.getElementById('pdf-output');
-            if (pdfOutput) {
-                // Wrap content in a div to prevent blank pages
-                pdfOutput.innerHTML = `<div style="margin: 0 !important; padding: 0 !important;">${combinedHtml}</div>`;
-                
-                // Force zero margin on first child as insurance against caching
-                const firstChild = pdfOutput.querySelector('div > *:first-child');
-                if (firstChild) {
-                    firstChild.style.marginTop = '0';
-                    firstChild.style.paddingTop = '0';
-                }
+            let combinedMarkdown = "";
+            // Use configured token separator
+            const separator = `\n\n${config.pageBreakToken}\n\n`;
 
-                // Also force zero margin on start of each new page (after page break)
-                // This is tricker to target via JS dynamically for PDF generation, 
-                // but the CSS rule .pdf-mode div > *:first-child should help if structure allows.
+            for (let i = startQuizNum; i <= startQuizNum + numQuizzes -1 ; i++) {
+                const quizMarkdown = generateQuiz(seedHex, i);
                 
-                // Use html2pdf lib
-                const opt = {
-                    margin:       [10, 10, 10, 10], // top, left, bottom, right
-                    filename:     'quizzes.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 1.5, useCORS: true },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak:    { mode: ['css', 'legacy'] }
-                };
+                combinedMarkdown += quizMarkdown;
                 
-                html2pdf().set(opt).from(pdfOutput).save();
+                if (i < startQuizNum + numQuizzes - 1) {
+                    combinedMarkdown += separator;
+                }
             }
+            
+            // Render to #md-output
+            const mdOutput = document.getElementById('md-output');
+            if (mdOutput) {
+                 // Remove page breaks for on-screen display if desired, or keep them.
+                 // marked will render HTML.
+                 mdOutput.innerHTML = marked.parse(combinedMarkdown);
+            }
+
+            // Call the refactored function
+            generatePDF(combinedMarkdown, 'quizzes.pdf');
         });
     }
 
