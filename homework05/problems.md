@@ -4,11 +4,13 @@
 
 ## 1. Objective
 
-Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL takes *time* as an input.
+Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL evolves over **Time**.
 
-In mathematical notation, the MODEL now updates its internal state as:
+In mathematical notation, the MODEL updates its internal state as:
 
-$$NewState = f(CurrentState, Input, Time)$$
+$$NewState = f(CurrentState, Input)$$
+
+Crucially, **Time** is now considered an intrinsic part of the **State** itself. We represent this using a variable called `tick` (as in the tick-tock of a clock) stored *inside* the Model `struct`. This allows the Model to track the passage of time and trigger automatic updates (like gravity) even when there is no user Input.
 
 ## 2. Hardware Map
 
@@ -16,8 +18,10 @@ $$NewState = f(CurrentState, Input, Time)$$
     * **8x16 LED Matrix:** `0xE020` (Left) to `0xE02F` (Right).
         * *Data:* 8 bits per column. LSB (Bit 0) is the bottom pixel; MSB (Bit 7) is the top pixel.
     * **Score Display:** `0xE800` (Hex Display).
+
 * **SIDE-CHANNEL VIEW (Debug/Info):**
-    * **Time Display:** `0xE808` (Hex Display).
+    * **`random` Display:** `0xE808` (Hex Display).
+
 * **CONTROLLER:**
     * **4x4 Keypad:** `0xD010` (Read-to-Clear).
 
@@ -49,20 +53,25 @@ You are to build a game called **"Coin Catcher"**.
     * *Constraint:* Score cannot go below 0 or above 99.
 
 5.  **Side Channel:**
-    * Display the running `time` counter on the second Hex display.
+    * Display the running `random` counter on the second Hex display.
 
 ---
 
 ## 4. Implementation Steps (MVC Guide)
 
-### Concept: Time vs. Tick
+### Concept: Tick
 
-The game loop runs very fast. If the coin moved every loop iteration, it would be unplayable. We use two concepts to manage this:
+The game loop runs very fast. If the coin moved every loop iteration, it would be unplayable. We use `tick` to manage this:
 
-1.  **Time (`time`):** A raw counter that increments every single loop iteration. It is used as a "seed" for randomness.
-2.  **Tick (`tick`):** A counter *inside* the **Model**. It increments every time `model_update` is called.
+-  **Tick (`tick`):** A counter *inside* the **Model**. It increments every time `model_update` is called.
     * When `tick` reaches `MAX_TICK`, the coin moves.
     * `tick` then resets to 0.
+
+### Concept: Randomness
+
+-  **Random (`random`):** A randomizer that changes every single loop iteration. Its change depends on the input.
+
+   - Since it is nearly impossible for humans to have the same input sequence at every single loop count, we achieve *pseudo-randomness* this way.
 
 ### Part A: The Model (`model_t`)
 
@@ -74,15 +83,15 @@ typedef struct {
     uint8_t coin_row;
     uint8_t coin_col;
     uint8_t score;      // Range 0-99
-    uint8_t tick;       // Speed control
+    uint8_t tick;       // Speed control (Time State)
     // Think whether you need 'matrix[16]' in the model
     // if you calculate positions during View Update
 } model_t;
 ```
 
 **Required Prototypes:**
-* `void model_init(model_t *mp, uint8_t time);`
-* `void model_update(model_t *mp, uint8_t time, command c);`
+* `void model_init(model_t *mp, uint8_t random);`
+* `void model_update(model_t *mp, uint8_t random, command c);`
 
 ### Part B: The Controller
 
@@ -100,11 +109,11 @@ typedef enum {
 
 ### Part C: Model Update Logic
 
-The prototype is: `void model_update(model_t *mp, uint8_t time, command c);`
+The prototype is: `void model_update(model_t *mp, uint8_t random, command c);`
 
 This function handles two parts:
 1.  **Input:** If `c` is `LEFT` or `RIGHT`, update `player_col`.
-2.  **Time:** Increment `tick`. If `tick` reaches `MAX_TICK`, update `coin_row`.
+2.  **Time State:** Increment `tick`. If `tick` reaches `MAX_TICK`, update `coin_row` and resets `tick` to 0.
 
 **Logic Table:**
 Use this table to determine the outcome during an update.
@@ -137,46 +146,50 @@ Construct the visual frame based on the model state.
 ## 5. Hints & Skeleton Code
 
 **Randomness:**
-To prevent the game from being predictable, use the provided helper function. Pass the current `time` from `main` into it.
+
+To prevent the game from being predictable, use the provided helper function. Pass the current `random` from `main` into it.
 
 ```c
 // Returns a random number between 0 and 15
-uint8_t random4(uint8_t time);
+uint8_t random4(uint8_t random);
 ```
 
 **Speed Control:**
 For the reference simulation, a tick value of 20 provides a good difficulty balance.
 
 ```c
-#define MAX_TICK 20
+#define MAX_TICK (20)
 ```
 
 **Main Loop Structure:**
-Your `main` function manages the integration of components and the raw time counter.
+Your `main` function manages the integration of components and the raw `random` twister.
 
 ```c
-void main(void) {
+void main(void){
     model_t m;
     model_t *mp = &m;
     command c;
-    uint8_t time = 0; // Raw time counter (0-255, wraps automatically)
 
-    model_init(mp, time);
+     // random counter
+    uint8_t random = 0;
 
-    while (true) {
+    // init will always be the same
+    model_init(mp, random);
+    
+    while (true){
         c = controller_read();
-        
-        // Update Model (Input + Time)
-        model_update(mp, time, c);
-        
+    
+        // Update Model (Input + random)
+        model_update(mp, random, c);
+
         // Render View
         view_update(mp);
-        
-        // Side Channel: Debug Time
-        *TIME_DISP = time;
-        
-        // Advance Time
-        time = time + 1; 
+
+        // Side Channel: view random
+        *RANDOM_DISP = random;
+
+        // move random based on 1 + input
+        random = random + 1 + (uint8_t ) c;
     }
 }
 ```
@@ -184,4 +197,4 @@ void main(void) {
 ## 6. Deliverables
 
 * **Test:** Verify your code works correctly in the simulator (`BareMetal-C/sim/hw5.sim1`).
-* **Submit:** The completed `homework05.c` file.
+* **Submit:** The completed `homework05.c` file. Start with `BareMetal-C/code/homeworks/homework05/homework05_skeleton.c`.

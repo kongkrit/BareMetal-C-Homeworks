@@ -1,271 +1,196 @@
-## Problems
+# Problem 1: Catch the Golden Coins!
 
 **Note:** Before starting, perform a **GitHub Fetch and Pull** to ensure you have the latest files.
 
----
+## 1. Objective
 
-## Problem 1: Catch the Golden Coins!
+Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL evolves over **Time**.
 
-You have been blessed! Golden coins are falling from the sky. You go out and try to catch them.
+In mathematical notation, the MODEL updates its internal state as:
 
-### 1. Objective:
+$$NewState = f(CurrentState, Input)$$
 
-Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL takes *time* as an input. So, in math (not C) notation, the MODEL update its internal state this way:
+Crucially, **Time** is now considered an intrinsic part of the **State** itself. We represent this using a variable called `tick` (as in the tick-tock of a clock) stored *inside* the Model `struct`. This allows the Model to track the passage of time and trigger automatic updates (like gravity) even when there is no user Input.
 
-> `new_model_state = function(current_model_state, input, time)`
+## 2. Hardware Map
 
-### 2. Hardware Map (Recap)
+* **VIEW (Game World):**
+    * **8x16 LED Matrix:** `0xE020` (Left) to `0xE02F` (Right).
+        * *Data:* 8 bits per column. LSB (Bit 0) is the bottom pixel; MSB (Bit 7) is the top pixel.
+    * **Score Display:** `0xE800` (Hex Display).
 
-- **VIEW:**
+* **SIDE-CHANNEL VIEW (Debug/Info):**
+    * **`random` Display:** `0xE808` (Hex Display).
 
-  - **8x16 LED Matrix:** `0xE020` (Left) to `0xE02F` (Right).
-      - Data: 8 bits per column. LSB (Bit 0) is the bottom pixel; MSB (Bit 7) is the top pixel. This displays the "game world."
-  
-    - **Score Display:** `0xE800` to display score.
+* **CONTROLLER:**
+    * **4x4 Keypad:** `0xD010` (Read-to-Clear).
 
-- **SIDE-CHANNEL VIEW:**
+## 3. Game Specifications
 
-  *Side-Channel View* is a VIEW, but it is not a VIEW that's needed for the system to function. It mostly displays *debug* or other *information*. 
+You are to build a game called **"Coin Catcher"**.
 
-  - **Time Display:** `0xE808` to display `time`.
+### The Rules
 
-- **CONTROLLER:**
+1.  **The Player:**
+    * Represented as a **single pixel** on the **bottom row** (Row 0).
+    * Starts at a random column.
+    * Can move **Left** or **Right** using the Keypad.
+    * Movement is clamped to the screen edges (Column 0 to 15).
 
-  - **4x4 Keypad (Controller):** `0xD010` (Read-to-Clear).
- 
-### 3. Game Specifications:
+2.  **The Coins:**
+    * Represented as a **single pixel** spawning at the **top row** (Row 7).
+    * Falls down automatically (Row 7 $\to$ 6 $\to$ ... $\to$ 0) at a fixed speed determined by `MAX_TICK`.
+    * Falls in a straight vertical line (fixed column).
 
-You are to build a game called "Coin Catcher".
+3.  **The Goal:**
+    * **Catch:** If the coin is on the bottom row (Row 0) and the Player is in the **same column**, the score increases by **+3**.
+    * **Miss:** If the coin "falls through" the bottom row (waits on Row 0 until the next movement tick) and the Player is **NOT** there, the score decreases by **-1**.
+    * **Spawn:** Immediately after a Catch or a Miss, a new coin spawns at Row 7 in a new random column.
 
-**The Rules:**
+4.  **Display:**
+    * The Matrix must show both the Player and the Coin simultaneously.
+    * The Score Display must show the current score in Decimal (00-99).
+    * *Constraint:* Score cannot go below 0 or above 99.
 
-  1. **The Player:** represent the player as a **single pixel** on the **bottom row** (Row 0).
-
-  - The player starts at a random column (more on random below).
-
-  - The player can move **Left** or **Right** using the Keypad.
-
-  - The player cannot move off the screen (clamp between Col 0 and Col 15).
-
-  2. **The Coins:** represent a coin as a single pixel that spawns at the **top row** (Row 7).
-
-  - The coin falls down automatically (Row 7 $\to$ 6 $\to$ ... $\to$ 0) at a fixed speed.
-
-  - The coin falls in a fixed column until it hits the bottom.
-
-  3. **The Goal:**
-
-  - If the coin hits the bottom row (Row 0) and the **Player is in the same column**, the player "catches" it. Score +3.
-
-  - If the coin hits the bottom row and the Player is **NOT** there, the coin is missed. Score -1.
-
-  - Immediately spawn a new coin at the top (Row 7) at a new random column (see below) after the old one hits the bottom.
-
-  4. **Display:**
-
-  - The Matrix must show both the Player and the coin drop simultaneously.
-
-  - The Score Display must show the current Score (in Decimal, 00-99).
-
-  5. **Side Channel:**
-
-  - Display `time` as well. (details about `time` below).
+5.  **Side Channel:**
+    * Display the running `random` counter on the second Hex display.
 
 ---
 
-### Trying out the game:
+## 4. Implementation Steps (MVC Guide)
 
-- Load `BareMetal-C/sim/hw5.sim1`. This is the reference implementation. Run the simulation to understand how the game works.
+### Concept: Tick
 
-### Code skeleton:
+The game loop runs very fast. If the coin moved every loop iteration, it would be unplayable. We use `tick` to manage this:
 
-- Code skeleton is provided in `BareMetal-C/code/homeworks/homework05/homework05.c`. Add to this file. Do **NOT** change the function prototypes.
+-  **Tick (`tick`):** A counter *inside* the **Model**. It increments every time `model_update` is called.
+    * When `tick` reaches `MAX_TICK`, the coin moves.
+    * `tick` then resets to 0.
 
----
+### Concept: Randomness
 
-### 4. Implementation Steps (MVC Guide):
+-  **Random (`random`):** A randomizer that changes every single loop iteration. Its change depends on the input.
+   - Since it is nearly impossible for humans to have the same input sequence at every single loop count, we achieve *pseudo-randomness* this way.
 
-**TIME:**
+### Part A: The Model (`model_t`)
 
-In `main`, we will have a `uint8_t time` variable:
+Create a `struct` to hold the game state.
 
-- `time` ia a `uint8_t` data that starts out at `0`.
-- `time` increments by 1 every time we reach the end of `while (true)` loop.
-- When `time` reaches the maximum value, it *wraps around* back to 0. In C, `time` will *automatically wrap around* by doing:
+```c
+typedef struct {
+    uint8_t player_col; // Player is always Row 0
+    uint8_t coin_row;
+    uint8_t coin_col;
+    uint8_t score;      // Range 0-99
+    uint8_t tick;       // Speed control (Time State)
+} model_t;
+```
 
-    - `time = time + 1;`
+**Required Prototypes:**
+* `void model_init(model_t *mp, uint8_t random);`
+* `void model_update(model_t *mp, uint8_t random, command c);`
 
-- So, in `main`, we have this structure to support `time` (non-`time`-related code not shown):
+### Part B: The Controller
 
-  ```c
-  void main(void){
-      uint8_t time = 0;
-      // code
-      while (true) {
-          // code
-          time = time + 1;
-      }
-  }
-  ```
+The controller reads the keypad and converts specific keys into abstract commands.
 
-**TICK:**
+**Enum definition:**
+```c
+typedef enum {
+    NONE, LEFT, RIGHT
+} command;
+```
 
-If we let the coin fall by one row every time in `while (true)`, the coin will fall down too quickly. We introduce the concept of `tick`. `tick` is a counter that starts from 0 and counts up by 1 inside every `model_update`. This is how `tick` is implemented:
+**Required Prototype:**
+* `command controller_read(void);`
 
-- `tick` initializes to `0`.
-- `tick` increments by `1` every time we do a `model_update`.
-- once `tick` reaches `MAX_TICKS`, we move the `coin`, and set `tick` back to `0`.
+### Part C: Model Update Logic
 
-So, the coin does not move at every `time` update, but it moves every "`MAX_TICKS` x `time`" update.
+The prototype is: `void model_update(model_t *mp, uint8_t random, command c);`
 
-Your code may run slowly or quickly. For the reference code, I use:
+This function handles two parts:
+1.  **Input:** If `c` is `LEFT` or `RIGHT`, update `player_col`.
+2.  **Time State:** Increment `tick`. If `tick` reaches `MAX_TICK`, update `coin_row`.
 
-> `#define MAX_TICK (20)`
+**Logic Table:**
+Use this table to determine the outcome during an update.
+*Legend: `0` = False, `1` = True, `X` = Don't Care.*
 
-**4-bit RANDOM:**
-
-It will be very boring if every time the game is played, the coin drops in the same pattern. To achieve randomness, I have given you the following function:
-
-  > `uint8_t random4(uint8_t time);`
-
-You can use the return value of `random4` to be the column of the new gold drop. 
-
-**MODEL-CONTROLLER API:**
-
-- The controller passes the information to the model in this `enum`
-
-  ```c
-  typedef enum {
-      NONE, LEFT, RIGHT
-  } command;
-  ```
-
-**Part A: The Model (`model_t`)**
-
-Create a `struct` called `model_t` to hold the game state.
-
-- *Think:* What data do you need to track? What must be in the "savegame file".
-- *Suggestion:*
-
-  ```c
-  typedef struct {
-      uint8_t player_col; // Player is always Row 0
-      uint8_t coin_row;
-      uint8_t coin_col;
-      uint8_t score;
-      uint8_t tick;  // coin speed control
-      // Think whether you need 'matrix[16]' in the model
-      // if you calculate positions during View Update
-  } model_t;
-  ```
-- Model related function prototypes that you must implement:
-
-  - `void model_init(model_t *mp, uint8_t time);`
-  - `void model_update(model_t *mp, uint8_t time, command c);`
-
-**Part B: The Controller:**
-
-- The controller to handle only Left and Right inputs.
-- **Reminder:** `tick` is in the model. Controller should not use `tick` to make any decision at all.
-
-- Controller related function that you must implement:
-
-  > `command controller_read(void);`
-
-**Part C: The Model Update (`model_update`)**
-
-This is the hardest part. Instead of just having the `command`, you also have `time` as the inputs. So, the prototype for `model_update` is:
-
-  > `void model_update(model_t *mp, uint8_t time, command c);`
-
-- `time` advances the `tick` in the model.
-- Once `tick` reaches `MAX_TICK`, `tick` resets to `0`.
-- But you also have to take care of the input from `command` as well.
-
-So, you now have two types of updates:
-
-  1. **Input Driven**: If the controller detected a keypress, update `player_col`.
-
-  2. **Time Driven:** The rain must move down automatically.
-
-
-**Part D: The View:**
-
-Construct the visual frame based on the model.
-
-  1. Clear the matrix (set all columns to `0`).
-
-  2. Set the bit for the **Player** at (Row `0`, `player_col`).
-
-  3. Set the bit for the **coin** at (current `coin_row`, current `coin_col`).
-  
-  4. Write the model's `score` to the Hex Displays. (Remember homework 4.1).
-
-The function prototype is:
-
-  > `void view_update(const model_t *mp);`
-
----
-
-### 5. Hints & Skeleton Code
-
-**For Model update:**
-
-Look at the following table. It will help you write `model_update`. Remember `0` is `false`, `1` is `true`, and `X` means *"I don't care (doesn't matter)"*:
-
-| `coin_row == 0` | `coin_col == player_col` | `tick == MAX_TICK` | **Meaning** |
+| Coin on Row 0? | Player touches Coin? | Tick Maxed Out? | **Outcome / Action** |
 | :---: | :---: | :---: | :--- |
-| `1` | `1` | `X` | Caught a coin! |
-| `1` | `0` | `0` | Coin reaches bottom, but player isn't there. There is still time left to catch it. |
-| `1` | `0` | `1` | Miss a coin! | 
-| `0` | `X` | `0` | wait for coin to fall further |
-| `0` | `X` | `1` | time for coin to move down a row |
+| `1` | `1` | `X` | **CATCH!** Score +3. Spawn new coin. Reset tick. |
+| `1` | `0` | `0` | **IDLE.** Coin is sitting on bottom row. Player still has time to move to it. |
+| `1` | `0` | `1` | **MISS!** Score -1. Spawn new coin. Reset tick. |
+| `0` | `X` | `0` | **IDLE.** Coin is mid-air. Wait for tick. |
+| `0` | `X` | `1` | **GRAVITY.** Coin moves down one row. Reset tick. |
 
-**More Hints for `model_update`:**
+### Part D: The View
 
-  structure `model_update` this way:
+Construct the visual frame based on the model state.
 
-  ```c
-  void model_update(model_t *mp, uint8_t time, command c){
-      // check the input
-      switch(c) {
-          // check all possible inputs with "case"s. 
-      }
-      
-      // Use the tabke in previous section
-      // to update the following variables:
-      //     coin_row, coin_col,
-      //     player_col,
-      //     tick
+**Required Prototype:**
+* `void view_update(const model_t *mp);`
 
-      // "time" should not be used, except for calling
-      // random4(time)
-  }
-  ```
-
-**Structure of `main`:**
-
-  ```c
-  void main(void){
-      model_t m;
-      model_t *mp = &m;
-      command c;
-      uint8_t time = 0;
-      model_init(mp, time);
-      while (true){
-          c = controller_read();
-          model_update(mp, time, c);
-          view_update(mp);
-          *TIME_DISP = time;
-          time = time + 1;
-      }
-  }
-  ```
+**Steps:**
+1.  Clear the matrix buffer (all 0).
+2.  Set the bit for the **Player** at `(0, player_col)`.
+3.  Set the bit for the **Coin** at `(coin_row, coin_col)`.
+    * *Note:* Since the Player and Coin are independent, ensure that if they overlap, the pixel remains lit.
+4.  Write `score` to the Hex Display `0xE800`.
 
 ---
 
-### 6. Deliverables
+## 5. Hints & Skeleton Code
 
-- Make sure that your code works correctly in the simulator before submission.
+**Randomness:**
+To prevent the game from being predictable, use the provided helper function. Pass the current `random` from `main` into it.
 
-- Submit completed `homework05.c` file containing your implementation.
+```c
+// Returns a random number between 0 and 15
+uint8_t random4(uint8_t random);
+```
+
+**Speed Control:**
+For the reference simulation, a tick value of 20 provides a good difficulty balance.
+
+```c
+#define MAX_TICK 20
+```
+
+**Main Loop Structure:**
+Your `main` function manages the integration of components and the raw `random` twister.
+
+```c
+void main(void){
+    model_t m;
+    model_t *mp = &m;
+    command c;
+
+     // random counter
+    uint8_t random = 0;
+
+    // init will always be the same
+    model_init(mp, random);
+    
+    while (true){
+        c = controller_read();
+    
+        // Update Model (Input + random)
+        model_update(mp, random, c);
+
+        // Render View
+        view_update(mp);
+
+        // Side Channel: review random
+        *RANDOM_DISP = random;
+
+        // move random based on 1 + input
+        random = random + 1 + (uint8_t ) c;
+    }
+}
+```
+
+## 6. Deliverables
+
+* **Test:** Verify your code works correctly in the simulator (`BareMetal-C/sim/hw5.sim1`).
+* **Submit:** The completed `homework05.c` file. Start with `BareMetal-C/code/homeworks/homework05/homework05_skeleton.c`.
