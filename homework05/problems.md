@@ -4,13 +4,13 @@
 
 ## 1. Objective
 
-Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL evolves over **Time**.
+Extend the **MVC** pattern learned in class to create a real-time interactive game. You will transition from a static tool (Dot Painter) to a dynamic system where the MODEL evolves over **time**.
 
 In mathematical notation, the MODEL updates its internal state as:
 
   > `NewState = f(CurrentState, Input)`
 
-Crucially, **Time** is now considered an intrinsic part of the **State** itself. We represent this using a variable called `tick` (as in the tick-tock of a clock) stored *inside* the Model `struct`. This allows the Model to track the passage of time and trigger automatic updates (like gravity) even when there is no user Input.
+Crucially, **time** is now considered an intrinsic part of the **state**. We represent this using a variable called `tick` (as in the tick-tock of a clock) stored *inside* the Model `struct`. This allows the Model to track the passage of time and trigger automatic updates (like gravity) even when there is no user Input.
 
 ## 2. Hardware Map
 
@@ -155,13 +155,21 @@ uint8_t random4(uint8_t random);
 ```
 
 **Speed Control:**
+
 For the reference simulation, a tick value of 20 provides a good difficulty balance.
 
 ```c
 #define MAX_TICK (20)
 ```
 
+- **20** is just a starting suggestion. **You should adjust this number so the coins fall too quickly or too slowly.**
+
+- C code has no relationship to real-world time. If your code runs slowly, you may need to *decrease* `MAX_TICK` if the coins fall *too slowly*.
+
+- *Increase* `MAX_TICK` if the coins fall *too quickly*.
+
 **Main Loop Structure:**
+
 Your `main` function manages the integration of components and the raw `random` twister.
 
 ```c
@@ -198,3 +206,39 @@ void main(void){
 
 * **Test:** Verify your code works correctly in the simulator (`BareMetal-C/sim/hw5.sim1`).
 * **Submit:** The completed `homework05.c` file. Start with `BareMetal-C/code/homeworks/homework05/homework05_skeleton.c`.
+
+---
+
+## 7. Enhancements
+
+Is this homework too easy for you? Fear not! Here are the possible improvements. Add them and we will give you **bonus** points.
+
+### Bonus 1: Add RESTART.
+
+- Note that the prototype of `model_init` is:
+
+  > `void model_init(model_t *mp, uint8_t random);`
+
+**Feature to add:**
+
+- If the user clicks `R` on the keypad (row 0, column 3), restart the game.
+
+- Every time the game is restarted, `coin_col` and `player_col` should randomly vary.
+
+**HINT:** `enum command` will change to:
+
+```c
+typedef enum {
+    NONE, LEFT, RIGHT, RESET
+} command;
+```
+
+### Bonus 2: Optimize VIEW
+
+- Re-drawing the entire matrix display can be time-consuming.
+
+- Change `view_update` to draw **only when necessary**.
+
+- With this optimization, you may need to increase `MAX_TICK` significantly. (This is a good thing; it means the code runs efficiently.)
+
+- **Reference:** after optimization. I set `MAX_TICK` is set to **60** to make the coin fall from top to bottom in about 3 seconds.
