@@ -8,7 +8,7 @@ Extend the **MVC** pattern learned in class to create a real-time interactive ga
 
 In mathematical notation, the MODEL updates its internal state as:
 
-$$NewState = f(CurrentState, Input)$$
+  > `NewState = f(CurrentState, Input)`
 
 Crucially, **Time** is now considered an intrinsic part of the **State** itself. We represent this using a variable called `tick` (as in the tick-tock of a clock) stored *inside* the Model `struct`. This allows the Model to track the passage of time and trigger automatic updates (like gravity) even when there is no user Input.
 
@@ -39,7 +39,7 @@ You are to build a game called **"Coin Catcher"**.
 
 2.  **The Coins:**
     * Represented as a **single pixel** spawning at the **top row** (Row 7).
-    * Falls down automatically (Row 7 $\to$ 6 $\to$ ... $\to$ 0) at a fixed speed determined by `MAX_TICK`.
+    * Falls down automatically (Row 7 → 6 → ... → 0) at a fixed speed determined by `MAX_TICK`.
     * Falls in a straight vertical line (fixed column).
 
 3.  **The Goal:**
