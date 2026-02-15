@@ -75,3 +75,7 @@ Write the content of memory address from `0x4000` to `0x4007`
 |`0x4007`|`0x66`||||
 
 ---
+
+## Practice Problem 3: Phonetic Alphabet
+
+**COMING SOON**.
