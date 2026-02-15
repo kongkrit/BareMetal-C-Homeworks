@@ -1,5 +1,5 @@
 const config = {
-    maxHomeworks: 5,
+    maxHomeworks: 6,
     maxQuiz: 1,
     idLength: 10,
     padLength: 2,
