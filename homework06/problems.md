@@ -48,17 +48,19 @@ Write **C99 statements** (not full functions)  to perform the following actions 
   uint8_t  *p2 = ((volatile uint8_t  *)0x4001U);
   *p1 = 0x1234U;
   *p2 = 0x56U;
-  // wwrite column "time 1" when code reaches this
-   p1 = p1 + 1;
+  // write "Data @time 1" when code reaches this line
+
+  p1 = p1 + 1;
    p2 = p2 + 1;
   *p1 = 0xABCDU;
   *p2 = 0x78U;
-  // write column "time 2" when code reaches this
-   p1 = p1 + 2;
+  // write "Data @time 2" when code reaches this line
+
+  p1 = p1 + 2;
    p2 = p2 + 3;
   *p1 = 0x09EFU;
   *p2 = 0x33U;
-  // write column "time 3" when code reaches this
+  // write "Data @time 3" when code reaches this line
   ```
 
 Write the content of memory address from `0x4000` to `0x4007`
