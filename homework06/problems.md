@@ -164,7 +164,7 @@ If the user types **"COOL"**:
 3.  Read 'O' -> Find "omega" -> Print 'o', 'm', 'e', 'g', 'a', CR.
 4.  Read 'L' -> Find "lima" -> Print 'l', 'i', 'm', 'a', CR.
 
-Play with `BareMetal-C/sim/hw6.sim1` a bit to see how it works. *Expand* to see the screenshot.
+Play with `BareMetal-C/sim/hw6_3.sim1` a bit to see how it works. *Expand* to see the screenshot.
 
 <details>
 <summary>Expand to see screenshot:</summary>
@@ -286,5 +286,5 @@ void main(void) {
 
 ### Hardware and Deliverables:
 
-- Hardware is in: `BareMetal-C/sim/hw6.sim1`
+- Hardware is in: `BareMetal-C/sim/hw6_3.sim1`
 - Software: start with the skeleton code above and **submit** it as `homework6.c`.
