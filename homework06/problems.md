@@ -86,7 +86,7 @@ Write the content of memory address from `0x4000` to `0x4007`
 
 Before writing code, it is crucial to understand how C handles "strings". Unlike higher-level languages (like Python), C does not have a native "String" data type.
 
-### 0. NATIO Phonetic Alphabet
+### 0. NATO Phonetic Alphabet
 
 If you're interested, read about the [NATO Phonetic Alphabet](https://en.wikipedia.org/wiki/NATO_phonetic_alphabet).
 
@@ -287,4 +287,4 @@ void main(void) {
 ### Hardware and Deliverables:
 
 - Hardware is in: `BareMetal-C/sim/hw6_3.sim1`
-- Software: start with the skeleton code above and **submit** it as `homework6.c`.
+- Software: start with the skeleton code above and **submit** it as `homework6_3.c`.
