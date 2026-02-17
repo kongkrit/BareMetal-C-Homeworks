@@ -3,6 +3,8 @@
 ## Objective
 Implement the **Model** (state logic) and **Controller** (input logic) for a memory-mapped Whack-a-Mole game. The **View** (display logic) and hardware drivers are provided.
 
+*There is a **EXPANSION** to this problem to this as well. Look at section 8.*
+
 ## 0. Reference Implementation and code skeleton
 
 `BareMetal-C/sim/hw7.sim1` contains the reference implementation. Play with it. press the button right below the light to "whack-a-mole." Observe **HIT**, **MISS**, **SCORE**, and **TIMER** when you are playing.
@@ -151,4 +153,80 @@ typedef struct {
 
 ## 7. Hardware View
 
+<details>
+
+<summary>Click to see hw7 hardware</summary>
+
   ![hw7](./hw7.png)
+
+</details>
+
+## 8. Bonus Problem: 8-Mole Expansion Pack
+
+In this bonus challenge, we will upgrade the hardware to support **8 Moles** and **8 Whackers**. Additionally, instead of a simple ON/OFF light, each mole hole is now equipped with an **8-bit vertical LED strip**.
+
+This LED strip simulates the mole's depth. When a mole first appears, it is fully visible (all LEDs on). As the timer ticks down, the mole "recedes" back into the hole (fewer LEDs on) until it disappears completely.
+
+### 0. Play with the reference implementation
+
+Load up `BareMetal-C/sim/hw7x.sim1` to play.
+
+### 1. Extended Hardware Map
+
+#### Controller (Input)
+* **Extended Keypad Register (`0xD012`)**: Read-to-clear.
+    * **Bit 7 (MSB)**: `1` if a key is currently pressed (`valid`), `0` otherwise.
+    * **Bits 2-0**: The column index of the key pressed (`000`=Col 0 ... `111`=Col 7).
+    * **Bits 6-3**: Unused/Don't Care.
+
+#### View (Output)
+* **Mole LED Strips (`0xE080` - `0xE087`)**: Write-only.
+    * **Address Mapping**:
+        * `0xE080`: Mole 0
+        * `...`
+        * `0xE087`: Mole 7
+    * **Bit Mapping**: Each address controls a vertical bar of 8 lights.
+        * **MSB (Bit 7)**: Topmost light.
+        * **LSB (Bit 0)**: Bottommost light.
+
+### 2. Visual Logic: The Receding Mole
+
+The LED strip must reflect the remaining time for the current mole. You must map the `timer` value to a bar-graph display pattern as follows:
+
+| Timer Value | Visible Lights (Bottom-up) | Binary Pattern | Hex |
+| :--- | :--- | :--- | :--- |
+| `> 15` | 8 lights (Full) | `0b11111111` | `0xFF` |
+| `13 - 14` | 7 lights | `0b01111111` | `0x7F` |
+| `11 - 12` | 6 lights | `0b00111111` | `0x3F` |
+| `9 - 10` | 5 lights | `0b00011111` | `0x1F` |
+| `7 - 8` | 4 lights | `0b00001111` | `0x0F` |
+| `5 - 6` | 3 lights | `0b00000111` | `0x07` |
+| `3 - 4` | 2 lights | `0b00000011` | `0x03` |
+| `1 - 2` | 1 light | `0b00000001` | `0x01` |
+| `0` | 0 lights (Gone) | `0b00000000` | `0x00` |
+
+### 3. Summary of Changes
+
+To complete this bonus:
+
+1.  **Reference Hardware**: `BareMetal-C/sim/hw7x.sim1`
+
+2.  **Starter Skeleton**: `BareMetal-C/code/homeworks/homework07x/hw7x_skeleton.c`.
+    - `random_2bit` function has been changed to `random_3bit`.
+
+3.  **Things to update**:
+    - `command enum`
+    - `command controller_read(void)`
+    - `void model_init(model_t *mp)`
+    - `void model_update(model_t *mp, command c)`
+    - `void view_update(const model_t *mp)`
+
+### 4. Reference hardware view
+
+<details>
+
+<summary>Click to see hw7x hardware</summary>
+
+  ![hw7](./hw7x.png)
+
+</details>
